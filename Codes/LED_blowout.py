@@ -1,19 +1,14 @@
 #
-# Demonstration code for blowing out an LED using the change in its forward
-# voltage as a function of its temperature.
+# Demonstration code for blowing out an LED using the change
+# in its forward voltage as a function of its temperature.
 #
 from machine import ADC, Pin
 from time import sleep_ms
-
+# Create Pin and ADC objects, and start with the LED on
 pLED = Pin(13,Pin.OUT)
 adc = ADC(0)
-
-def read_ADC():
-    print(adc.read())
-
-# Start with the LED on
 pLED.value(1)
-    
+# Define a method for measuring background
 def LED_background(n=100,ns=256,ncycle=3):
     # Turn LED off
     pLED.value(0)
@@ -28,7 +23,7 @@ def LED_background(n=100,ns=256,ncycle=3):
             s_avg = s_sum/ns
             # Output result so it can be plotted
             print(s_avg)
-    
+# Define a method for detecting breeze and switching the LED
 def LED_thresh(n=100,ns=256,threshold=None,timeout_ms=None,verbose=False):
     if threshold == None:
         print('Please enter a value for threshold')

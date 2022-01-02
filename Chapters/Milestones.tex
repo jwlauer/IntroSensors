@@ -336,6 +336,22 @@
 \end{kaobox}
 %</mlst:04b>
 
+%<*mlst:04b2>
+\begin{kaobox}[backgroundcolor=\MScolor,frametitlebackgroundcolor=\MScolor,frametitle=\showmscntr Milestone: Blowing out an LED]
+	\begin{itemize}
+		\item [$\Box$] This Milestone is to assemble, test and find suitable parameters for a circuit to ``blow out an LED'' as described in this section.
+		The key steps are:
+		\begin{itemize}
+			\item[$\circ$] Assemble and double check the circuit.
+			\item[$\circ$] Run the \lstinline{LED_background} function to identify the approximate \adc reading for a lit LED in still air.
+			\item[$\circ$] Execute the \lstinline{LED_thresh} method with various choices of the parameters \lstinline{n}, \lstinline{ns} \lstinline{threshold} and \lstinline{timeout_ms}. Experiment to find combinations that respond as quickly and reliably as possible by turning the LED off momentarily when you blow on it.
+			\item[$\circ$] When you have a parameter combination that works well, conduct a ``ministudy'' by varying a single parameter at a time. Take note of what happens when you increase or decrease each parameter individually -- if the circuit works better, more poorly or not at all, try to identify the cause (e.g., is the threshold never reached or reached too often, is there excessive noise in the samples, is response time too slow, \etc).
+		\end{itemize}
+		When you have completed your experiments, complete the assignment by uploading: (a) an image or labeled sketch of your breadboard layout; (b) your choice of ``best'' parameters; and, (c) your diagnosis of the effects of the systematic parameter changes.
+	\end{itemize}
+\end{kaobox}
+%</mlst:04b2>
+
 %<*mlst:04c>
 \begin{kaobox}[backgroundcolor=\MScolor,frametitlebackgroundcolor=\MScolor,frametitle=\showmscntr Milestone: Calibrating a thermistor]
 	\begin{itemize}

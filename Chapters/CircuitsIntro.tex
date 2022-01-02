@@ -660,6 +660,209 @@ R_{therm} = \frac{V_{data}}{V_{in}-V_{data}}R_1.
 We do not know ahead of time which strategy will yield a better temperature sensor.
 Which resistor to replace, and what value to choose for the remaining resistor, will emerge from the sensor design process.
 
+\subsection{Temperature responses of Light Emitting Diodes (LEDs)}
+\labsec{blowout}
+As a visual demonstration of the temperature effects on electronic components that form the basis of thermistors and many other environmental sensors, you can create a simple circuit that enables you to \htmladdnormallink{``blow out an LED like a candle''}{https://www.instructables.com/An-LED-You-Can-Blow-Out-Like-a-Candle/}.
+Though it is less quantitative, it works on the same principle as the thermistor-based temperature measurements that are the focus of this section.
+Building and using this circuit will give you valuable intuition as you design, assemble and calibrate a circuit to make more accurate and precise temperature measurements with a thermistor.
+
+The ``blow out an LED like a candle'' circuit is based on two properties of LEDs.
+
+One is that, though LEDs are efficient, some of the electrical energy used to power them is converted into heat rather than light (\htmladdnormallink{incandescent light bulbs}{https://en.wikipedia.org/wiki/Incandescent_light_bulb} are less efficient because a much larger fraction of their power is lost as heat).
+This heat production means that a lit LED tends to be warmer than an unlit LED:
+The unlit LED tends to be at the same temperature as the surrounding air.
+The lit LED, in contrast, warms up to an equilibrium temperature at which the heat it produces is equal and opposite to the heat it loses to the surrounding air.
+
+As you know from your personal experience with ``wind chill'', heat is lost at a much faster rate when a breeze is blowing over a warm object than in still air.
+This is known in engineering as \texttt{convective heat transfer}, or more simply as \texttt{convection}.
+This faster heat loss means that, for a given amount of heat generated, the temperature at which a lit LED is in equilibrium with its surroundings is lower in a breeze than in still air.
+
+The other relevant property is that the effective resistance of LEDs changes as they change in temperature.
+LEDs share this temperature sensitivity with many other diodes, as ``incidental'' consequences of their designed characteristics, and also with thermistors that are designed specifically to have strong temperature responses.
+The result is that measuring resistance can be a useful proxy for measuring temperature, which in the case of a lit LED is also a proxy for whether a breeze is blowing.
+
+The ``blow out an LED like a candle'' circuit combines two sub-circuits you have already built:
+\begin{itemize}
+	\item an externally powered LED switched on and off by a \gpio (\refsec{ext_led}); and,
+	\item a voltage divider to measure voltages through your microcontroller's \adc (\refsec{vd_assem}).
+\end{itemize}
+The voltage divider is assembled with the LED as one of the resistors.
+The resistance across the LED can be inferred from the voltage between the resistors, and used to indicate whether or not the LED temperature reflects a blowing breeze.
+It is then possible to write a Python script that responds to indications of a breeze by ``blowing out'' the LED.
+
+\subsubsection{\howto Blow out an LED}
+\labsec{LED_blow}
+\begin{marginfigure}[-0cm]
+	\begin{center}
+		\htmladdnormallink{\includegraphics[width=\MFW]{Images/LED_blowout.jpg}}{https://publicsensors.org/IntroSensors/Images/LED_blowout.jpg}
+		\caption[LED blowout circuit layout]{An example layout of the ``LED blowout'' circuit. The wires of tiny 0402 LED are attached to a small dowel with a drop of hot melt glue, at a distance from the LED (to avoid increasing heat conduction).
+		The dowel is similarly glued to the breadboard.
+		This is to minimize shaking, which tends to happen when the LED is held by hand.
+		Shaking creates air flow past the LED, which may make the temperature difference between breeze and still air harder to detect.}
+		\labfig{LED_blow_layout}
+	\end{center}
+\end{marginfigure}
+Having this demonstration work in a satisfying way depends on achieving sufficient \texttt{sensitivity} to distinguish the relatively subtle effects of convective heat tranfer caused by blowing on the LED.
+This is greatly facilitated by selecting both hardware and software to increase the signal and decrease noise.
+
+In particular, it is helpful to use a \emph{tiny} LED, which heats up more and faster than a larger LED under a given rate of heat production (and conversely cools down more and faster in a breeze).
+That is, the temperature signal is larger.
+
+The smallest commonly available LEDs are in a size category called ``0402'', meaning they are 0.04 by 0.02 by 0.02 inches.
+They are intended as surface mount LEDs to be placed on PCBs (like the ones on many microcontrollers) but they are also sold with thin wires pre-soldered onto them.
+Though it is possible to use larger LEDs, these pre-wired 0402 LEDs are the easiest to use in the circuit you are about to build.
+
+It is also helpful to use replicated sampling to decrease noise.
+The \adc on \esp8266's has limited resolution, and even within its ability to resolve small voltage differences there is substantial measurement noise.
+By averaging over many repeated measurements, we can obtain a more precise measurement of the voltage divider's internal voltage, and hence a more precise assessment of the LED's resistance.
+This translates in turn to a more accurate determination of whether or not substantial convective heat transfer is occurring.
+Depending on the sampling rate, though, it may also impose a constraint on how fast the circuit can respond.
+
+An example breadboard layout is given in \reffig{LED_blow_layout}.
+
+\begin{enumerate}
+\item \textbf{Assemble a \gpio-driven LED sub-circuit}
+\begin{itemize}
+	\item Insert your microcontroller to the breadboard, and use jumpers to connect GND and 3V3 to their respective power rails.
+
+	\item Connect one end of a $220\Omega$ resistor to the \texttt{GND} rail, and the other end to an empty row in the breadboard.
+
+	\item Use a jumper to connect the control \gpio to another empty row in the breadboard.
+
+	\item Connect the negative terminal of the LED to the breadboard row with the resistor, and the positive LED terminal to the breadboard row with the control \gpio.
+
+	\smallskip
+	In the example in \reffig{LED_blow_layout}, the control \gpio is \texttt{Pin 13}.
+
+\end{itemize}
+\item \textbf{Test the \gpio-driven LED sub-circuit}
+
+To make sure your sub-circuit works as you intend, turn the control \gpio on and off with commands like
+\begin{lstlisting}[language=Python]
+from machine import Pin
+pLED = Pin(13, Pin.OUT)
+pLED.value()
+pLED.value(1)
+pLED.value()
+pLED.value(0)
+\end{lstlisting}
+If you used a different \gpio than \texttt{Pin 13}, adjust the pin declaration accordingly.
+When the value of \texttt{pLED} is 1, the LED should be on, and when the value is 0 the LED should be off.
+
+\item \textbf{ that the voltage divider is within the 1V tolerance of the microcontroller's \adc.}
+
+With the LED on, measure the voltage at the junction between the resistor and the negative LED terminal.
+The \esp8266's \adc has a voltage tolerance of \texttt{1V}.
+If the LED is similar to those used in \htmladdnormallink{``blow out an LED like a candle''}{https://www.instructables.com/An-LED-You-Can-Blow-Out-Like-a-Candle/} and in \reffig{LED_blow_layout}, a $220\Omega$ resistor should put the measured voltage somewhere in the middle third of the \texttt{0V} to \texttt{1V} range.
+
+\smallskip
+\textbf{If the measured voltage is outside the tolerated range, stop and figure out why before proceding!}
+
+\smallskip
+If there are problems, possible explanations include: needing a different value resistor, easuring at the wrong place in the circuit, or a mistake in the circuit layout.
+Because a voltage exceeding its tolerance may destroy the \adc (and possibly other parts of the microcontroller as well) it is critical to make sure the LED sub-circuit is working as intended before taking the next step.
+
+\item \textbf{Use a jumper to connect the LED-resistor junction to the micrcocontroller's \adc.}
+
+This connection creates a simple sub-circuit for monitoring LED resistance (from which its temperature and the presence of a breeze can be inferred). Test this sub-circuit with commands like
+\begin{lstlisting}[language=Python]
+from machine import ADC
+adc = ADC(0)
+print(adc.read())
+\end{lstlisting}
+A correctly wired sub-circuit should return values in the middle of the 0-1024 range when the LED is on, and near 0 when it is off.
+
+\end{enumerate}
+
+This completes the hardware assembly for blowing out an LED.
+The next steps are to set up software and find effective parameters.
+
+The code you will use for the remainder of this exercise is listed below.
+\lstinputlisting[language=Python,label=LED_blowout,caption={\htmladdnormallink{\texttt{LED\textunderscore blowout.py}}{https://github.com/publicsensors/IntroSensors/blob/main/Codes/LED_blowout.py}: A Micropython script to ``blow out'' an LED regulated by \texttt{GPIO 13}.}]{Codes/LED_blowout.py}
+
+This code has three sections.
+The first section imports modules and creates the \pin and \adc objects.
+The second section defines a method you can use to determine what the ``background'' ranges of \adc readings are expected for still air.
+The third section defines a method that switches off the LED when the \adc reading exceeds a specified threshold.
+You will need to determine this threshold through a combination of output from the background measurements and experimentation.
+\begin{enumerate}[resume]
+\item \textbf{Download the \texttt{LED\textunderscore blowout.py} code, and copy it onto your microcontoller.}
+
+If you used a \gpio different than \texttt{Pin 13}, remember to edit the pin assignment in the code accordingly.
+
+\item \textbf{Import the \texttt{LED\textunderscore blowout.py} code}
+
+Use a command like
+\begin{lstlisting}[language=Python]
+from LED_blowout import *
+\end{lstlisting}
+to initialize the \gpio and \adc, and to import the two methods.
+
+\item \textbf{Execute the \texttt{LED\textunderscore background} method to detemine the relevant voltage ranges}
+
+The \texttt{LED\textunderscore background} method prints out a sequence of averaged \adc values, cycling through periods when the LED is on and when it is off.
+It is invoked with a command like
+\begin{lstlisting}[language=Python]
+LED_background(n=1000,ns=256,ncycle=3)
+\end{lstlisting}
+In this command:
+\begin{itemize}
+\item  \texttt{n} is the number of successive values to print out for each LED state (e.g., \texttt{n=1000} means it will print out 1000 values when the LED is off, then a 1000 values when it is on, then another 1000 when it is off, \etc).
+
+\item \texttt{ns} is the number of \adc readings to average into a ``sample''.
+For example, \texttt{ns=256} means that 256 \adc readings will be averaged, and that result will be printed as output \texttt{n} times for each on/off cycle.
+
+\item \texttt{ncycle} is the number of times to switch the LED.
+For example, \texttt{ncycke=3} tells the code to print out \texttt{n} samples first with the LED off, then with it on, then with it off again.
+\end{itemize}
+Try executing this method, with the LED in still air, to get a sense for the ``background'' \adc signal.
+The goal is to determine a threshold value, such that \adc readings just below this threshold indicate an LED warmed in still air while readings just above the threshold indicate an LED cooled by a breeze.
+
+\smallskip
+Keep in mind that large values of \texttt{n}, \texttt{ns} and \texttt{ncycle} may be more informative but also take a longer time to run.
+
+\smallskip
+If you are using \thonny, it is helpful to turn on the plotting so that you can get a visual sense for the ranges of values as they stream by.
+
+\item \textbf{Execute the \texttt{LED\textunderscore thresh} method to ``blow out'' the LED}
+
+The \texttt{LED\textunderscore thresh} method takes a sequence of averaged \adc values, turning the LED off for a brief interval when those readings exceed a given threshold value.
+It is invoked with a command Like
+\begin{lstlisting}[language=Python]
+LED_thresh(n=1000,ns=256,threshold=497,timeout_ms=500)
+\end{lstlisting}
+In this commands:\begin{itemize}
+\item  \texttt{n} is the number of successive averaged \adc values over which to test for presence of a breeze.
+This parameter essentially determines how long a given run of the method should last, before it halts and gives you an opportunity to change parameters.
+As usual, \texttt{ctrl-c} should interupt a run if it goes too long.
+
+\item \texttt{ns} is (as before) the number of \adc readings to average into a ``sample''.
+As before, there is a tradeoff between high replication to reduce noise and long sampling intervals.
+
+\item \texttt{threshold} is the \adc reading level at which to turn off the LED.
+The approximate value of this threshold is indicated by the output of \lstinline{LED_background} method, when the LED is lit in still air.
+
+\smallskip
+Ideally, \lstinline{threshold} should be set so that readings from an unlit LED are reliably under it, while readings from a lit LED are reliably over it.
+Given signal noise in the \adc, however, there are tradeoffs between false positives (values over threshold when the LED is off), false negatives (values under threshold when the LED is on), the time required to respond to a breeze starting or stopping, and other factors.
+
+\item \lstinline{timeout_ms} is the time to keep the LED off when a breeze is detected, and to keep the LED on afterwards to enable it to warm up before \adc readings are resumed.
+This parameter is in units of milliseconds, so for example \lstinline{time_ms=500} means that the LED will stay off for a half second and then on for another half second before sampling resumes.
+
+\item \lstinline{verbose} is an optional parameter.
+
+\smallskip
+Setting this parameter to \lstinline{True} generates additional output (the minimum and maximum \adc readings in each sample, and the threshold).
+These are particularly informative in a plot, such as that produced by \thonny when the \texttt{Plotter} menu item is checked.
+
+\end{itemize}
+Experiment by executing this method with various choices of parameters, to identify parameter combinations that cause the LED to ``blow out'' when you create a breeze by blowing a stream of air at it.
+
+\end{enumerate}
+
+\loadMilestone{mlst:04b2} % load milestone with tags id: mlst:04b2
+
+
 \subsection{Thermistor temperature-resistance curves}
 Thermistors are usually referred to by their \texttt{nominal resistance value}, which is their designed resistance at the reference temperature, $25^\circ$ \texttt{C} ($77^\circ$ \texttt{F}).
 Common nominal resistance values for thermistors range from $100\Omega$ through $100k\Omega$.
@@ -1303,7 +1506,7 @@ Then, you will code a driver to automatically select between the direct and redu
 	\begin{center}
 		\htmladdnormallink{\includegraphics[width=\MFW]{Fritzing/feather_tsl237_bb.png}}{https://publicsensors.org/IntroSensors/Fritzing/feather_tsl237_bb.png}
 		\caption[Complete light sensor circuit schematic]{An illustration of the circuit layout for sensing light coupling a \texttt{CD4017B} divider/counter with a \texttt{TSL237} Light-to-Frequency sensor.
-		Sub-circuit 2 is an addition to sub-circuit 1, which is not modified.
+		sub-circuit 2 is an addition to sub-circuit 1, which is not modified.
 		Wire colors retain the same meaning as in sub-circuit 1, with the additional purple wire representing divided frequency from the frequency-modulated sensor output.
 		in which frequency is read directly from the sensor.}
 		\labfig{feather_tsl237}
