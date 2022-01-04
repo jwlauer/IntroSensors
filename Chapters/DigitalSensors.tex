@@ -134,13 +134,43 @@ However, it means that trying to use multiple sensors of the same type on a sing
 Because there are more types of devices than distinct addresses, there are also overlaps between the addresses of some different sensor types.
 Adafruit has written a useful \htmladdnormallink{summary of default \i2c addresses}{https://cdn-learn.adafruit.com/downloads/pdf/i2c-addresses.pdf}, describing addresses used by different types of sensors and other devices.
 
-
 It's largely a matter of luck whether two sensor types have conflicting addresses, but works out most of the time.
 
 For cases when it doesn't, some \i2c devices have a mechanism, like movable jumpers, to change \i2c addresses so that two or more of these devices can co-exist on the same cable.
 Another alternative, of course, is to have more than one \i2c bus, \eg by having separate hardware and bit-banged \i2c buses.
 Still another workaround is an \i2c \htmladdnormallink{multiplexer}{https://github.com/mcauser/micropython-tca9548a}, which is an \i2c device that can direct communications to any of eight \i2c devices attached to it whether or  not they have the same addresses (see \refsec{i2c_multi}).
 % The reference to the external RTC is \refsec{ext_i2c_time}
+
+% \sidenote[][*0]{
+	\begin{kaobox}[frametitle=Addressing the part!]How can you tell how many \i2c devices are attached to a microcontroller, and what are their addresses?
+  \Micropython makes it easy to \textbf{scan} an \i2c bus and print out the addresses of all detected devices:
+			\begin{lstlisting}[language=Python]
+from machine import Pin, I2C
+i2c = I2C(scl=Pin(5),sda=Pin(4))  # create an ADC object
+i2c.scan()    # read the ADC and print the result\end{lstlisting}
+
+		\smallskip
+		To use \i2c's \lstinline{scan()} method to its full effect, you need to be aware that \i2c addresses are commonly written in two different ways.
+		The \lstinline{scan()} method returns the addresses of devices it detects as \textbf{integers}.
+		In other situations, including Adafruit's \htmladdnormallink{summary of default \i2c addresses}{https://cdn-learn.adafruit.com/downloads/pdf/i2c-addresses.pdf}, addresses are listed in \textbf{hexadecimal} notation.
+
+		For example, when a \texttt{TSL2591} light sensor is attached to the \i2c bus, the output is
+    \begin{lstlisting}[language=Python]
+[41]\end{lstlisting}
+    In Adafruit's summary, the \texttt{TSL2591} light sensor is listed under the address \lstinline{0x29}.
+
+		\smallskip
+		It is easy to convert between these two formats, using the built-in functions \lstinline{hex} (which converts an integer into hexadecimal) and \lstinline{int} (which converts a hexadecimal into an integer).
+		For the \texttt{TSL2591}, the address format conversion in both directions is:
+    \begin{lstlisting}[language=Python]
+			>>> hex(41)
+			'0x29'
+			>>> int(0x29)
+			41
+			>>>\end{lstlisting}
+    With the \lstinline{scan()} method, \lstinline{hex} and \lstinline{int}, you are equipped to figure out the addresses of any device attached to an \i2c bus in \Micropython.
+	\end{kaobox}
+% }
 
 \subsection{ Measuring temperature with a high-resolution sensor }
 As a first demonstration of sampling environmental conditions using the \i2c protocol, we will work with the \MCP9808 digital temperature sensor.
