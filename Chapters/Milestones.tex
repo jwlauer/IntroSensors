@@ -573,6 +573,21 @@
 \end{kaobox}
 %</mlst:05d>
 
+%<*mlst:05d2>
+\begin{kaobox}[backgroundcolor=\MScolor,frametitlebackgroundcolor=\MScolor,frametitle=\showmscntr Milestone: Making an \i2c I/O expander-based counter]
+	\begin{itemize}
+		\item [$\Box$] This Milestone is to implement a \texttt{MCP23017}-based counter as described in this section, and to modify it by adding a button to reset the counter. \,
+		\begin{itemize}
+			\item[$\circ$] Assemble a circuit similar to \reffig{i2c_IO}, upload the provided codes.
+			\item[$\circ$] Test it to demonstrate that the circuit and software works as intended.
+			\item[$\circ$] Design and assemble a modified circuit, in which you add a third button and LED. Connect these new elements to the \texttt{MCP23017} in an analogous way (but to different \gpios) as in the original circuit.
+			\item[$\circ$] Save a copy of the \lstinline{mcp_count.py} script under a different name. Modify the new script to respond to presses of the new button by illuminating the new LED, and to releases of the new button by extinguishing the new LED and resetting the counter to 0. \,
+		\end{itemize}
+		When your new circuit and script are working correctly, complete the assignment by uploading: (a) a photo or sketch of your modified counter circuit; (b) your code; and, (c) the output you obtained from your REPL session showing increments, decrements and reset of the counter.
+	\end{itemize}
+\end{kaobox}
+%</mlst:05d2>
+
 %<*mlst:05c>
 \begin{kaobox}[backgroundcolor=\MScolor,frametitlebackgroundcolor=\MScolor,frametitle=\showmscntr Milestone: Reading and writing data files from a microSD card]
 	\begin{itemize}
