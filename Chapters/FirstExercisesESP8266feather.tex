@@ -600,6 +600,7 @@ When you find the difference between what you did and what you meant to do, the 
 \loadMilestone{mlst:02c} % load milestone with tags id: mlst:02c
 
 \subsection{Acting reflexively: GPIO \texttt{interrupts} and \texttt{handlers}}
+\labsec{interrupt}
 Now that you have a button that conveys a signal to your microcontroller, how can you use it to perform a useful function?
 One approach would be to have a code that continually checks whether a button is being pressed or not.
 However, this wastes a lot of processing power, and besides is cumbersome to incorporate into environmental sensor codes.
@@ -795,6 +796,7 @@ If not, look things over and see if you can find a flaw in the assembly of your 
 
 
 \subsection{Fine control using Pulse Width Modulation}
+\labsec{LED_PWM}
 The GPIO pins on your ESP8266 (and many other microcontrollers) can output only two values --- high (\texttt{3.3V}) and low (\texttt{0V}).
 That's great for devices that need to be fully on or fully off.
 However, in many cases it’s useful to have an intermediate -- ``partway on''.

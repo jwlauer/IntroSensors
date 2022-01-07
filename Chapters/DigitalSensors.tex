@@ -303,7 +303,7 @@ However, these sensors share the same \i2c address, so both cannot function simu
 
 \subsubsection{\howto Set up a TCA9548A \i2c multiplexer}
 
-\begin{marginfigure}[-14cm]
+\begin{marginfigure}[-11cm]
 	\begin{center}
 		\htmladdnormallink{\includegraphics[width=\MFW]{Images/i2c_multiplexer_circuit.jpg}}{https://github.com/publicsensors/IntroSensors/blob/digital/Images/i2c_multiplexer_circuit.jpg}
 		\caption[TCA9548A \i2c multiplexer circuit]{A TCA9548A \i2c multiplexer is used in this circuit to enable both a TCS34725 color sensor and a TSL2591 full spectrum/\gls{irLabel} sensor to operate on the same \i2c bus, even though they share the same \i2c address. The jumpers at the upper left lead to the microcontroller (red $\leftrightarrow$ \texttt{3V3}, black $\leftrightarrow$ \texttt{GND}, white $\leftrightarrow$ \texttt{SCL} and green $\leftrightarrow$ \texttt{SDA}. The white dot at the center is the built-in LED on the TCS34725, used to provide a standard illumination spectrum in some types of color measurements.}
@@ -349,7 +349,7 @@ color_sample =  (15, 10, 9, 34)
 
 \loadMilestone{mlst:05b} % load milestone with tags id: mlst:04c
 
-\subsection{Using I2C over long cables with differential extenders}
+\subsection{Using \i2c over long cables with differential extenders}
 \labsec{i2c_extend}
 
 \begin{marginfigure}
@@ -393,6 +393,204 @@ This is accomplished by cutting traces on the upstream extender, and adding jump
 
 
 \loadMilestone{mlst:05d} % load milestone with tags id: mlst:04c
+
+
+\subsection{Adding \gpios with \i2c}
+\labsec{i2c_add_gpios}
+\i2c devices can also be used to provide additional digital \gpios.
+Because these operate through an \i2c bus, they do not typically operate quickly enough to perform very fast switching tasks, such as the Pulsed Width Modulation (PWM) used to ``snooze'' an LED (\refsec{LED_PWM}).
+Nonetheless, they respond quickly enoungh -- typically over a few milliseconds -- to perform many useful functions.
+With microcontrollers such as the \esp8266 that have relatively few \gpios, these expanders use just two \gpios, \texttt{SCL} and \texttt{SDA} but add 8 or 16 \gpios (and, with multiple expanders, potentially many more).
+If, as is often the case, an \i2c bus is already present, \i2c expanders require no additional \gpios.
+
+In the context of environmental sensing, \i2c I/O expanders are often useful because they provide \emph{remote} \gpios.
+For example, anemometers, rain gauges, water current meters and many other types of sensors are often based on counting propeller rotations or switch toggles.
+These mechanical devices are often separated from the microcontroller by a lengthy cable.
+With \i2c I/O extenders, especially in combination with \i2c differential extenders (\refsec{i2c_extend}), \gpios to count rotations or switch toggles in these devices can be placed 10s of meters away.
+
+The activity in this section anticipates these types of applications by setting up a counter with plus/minus buttons and LED indicators, using an \texttt{MCP23017} \i2c I/O expander.
+It demonstrates, among other things, how to set up interactions between a timer-based interrupt (distinct from the button-based interrupt in \refsec{interrupt}) on the microcontroller and the \texttt{MCP23017}'s built-in interrupt functions.
+
+\subsubsection{\howto Remote Input/Output with an \texttt{MCP23017} I/O expander}
+\begin{marginfigure}
+	\begin{center}
+		\htmladdnormallink{\includegraphics[width=\MFW]{Fritzing/feather_MCP23017_bb_crop.png}}{https://github.com/publicsensors/IntroSensors/blob/digital/Fritzing/feather_MCP23017_bb_crop.png}
+		\caption[\i2c I/O expander on a breadboard]{An example circuit with an \texttt{MCP23017} \i2c I/O expander connected to a microcontroller. }
+				\labfig{i2c_IO}
+	\end{center}
+\end{marginfigure}
+Begin by reviewing the pin geometry of the \texttt{MCP23017}, which is described in the \htmladdnormallink{datasheet}{https://ww1.microchip.com/downloads/en/devicedoc/20001952c.pdf}.
+Refer to the first figure in this datasheet as you make connections in the steps below.
+
+The breadboard layout for this circuit is illustrated in \reffig{i2c_IO}.
+Because the \texttt{MCP23017} is a relatively long IC, it is laid out on a long breadboard.
+An equally effective circuit can be laid out across two shorter breadboards.
+
+\begin{enumerate}
+	\item \textbf{Attach your microcontroller as usual, with jumpers connecting both sets of rails to \texttt{GND} and \texttt{3V3}.}
+
+	\item \textbf{Insert the \texttt{MCP23017} and two momentary switches.}
+
+	Note that, in this layout, the indentation marking the orientation of the \texttt{MCP23017} is pointing away from the microcontroller.
+  This places the \i2c, \gpios and other pins on the \texttt{MCP23017} close to where their breadboard connections will be.
+
+	\smallskip
+	Be sure to place your buttons in the proper orientation, as in \refsec{interrupt}.
+
+	\item \textbf{Set the \i2c address by jumpering the \texttt{A0}, \texttt{A1} and \texttt{A2} pins to \texttt{GND}.}
+
+	In \reffig{i2c_IO}, these are the pins at the upper left of the IC.
+	This fixes the \texttt{MCP23017}'s \i2c address as \verb|0x20|.
+	Note that, by jumpering one or more of these pins high, the \texttt{MCP23017} adopts an \i2c address from \verb|0x21| to \verb|0x27|.
+	This makes it possible to put up to eight of these devices on a single \i2c bus, even without a multiplexer.
+
+	\item \textbf{Use a $10k\Omega$ resistor to connect the \texttt{RESET} pin to \texttt{3V3}.}
+
+	This resistor acts as a ``pull-up'' resistor.
+	This means that, in the absence of another contact, the pin takes on a high value, but it is still possible to pull it to a low value by jumpering it to \texttt{GND} without generating too much heat.
+
+	\smallskip
+	A low value for \texttt{RESET} causes the IC to reset, losing pin states and settings.
+	Holding this pin high prevents that.
+
+	\item \textbf{Connect the \texttt{SCL} and \texttt{SDA} pins on the \texttt{MCP23017} to their counterparts on the microcontoller.}
+
+
+	\item \textbf{Use two more $10k\Omega$ resistors to pull up the \texttt{SCL} and \texttt{SDA} pins on the \texttt{MCP23017}.}
+
+	These pull-up resistors are a required part of an \i2c bus.
+  Because many break-out boards (i.e., ICs already embedded in supporting circuits on PCBs) have built in pull-up resistors, we have not needed pull-up resistors in the \i2c circuits used earlier.
+	However, in this case we are using a bare IC without built in supporting circuitry, so we must supply the pull-ups.
+
+  \item \textbf{Use jumpers to connect the \texttt{MCP23017} to the \texttt{GND} and \texttt{3V3} rails.}
+
+	The positive input voltage for the \texttt{MCP23017} is labeled \texttt{V\small{DD}} on the datasheet.
+	The negative input is labeled \texttt{V\small{SS}}.
+
+  \item \textbf{Connect two LEDs, with their negative terminals in the \texttt{GND} rail and their positive terminals in \texttt{MCP23017} \gpios 8 and 9.}
+
+	These LEDs will provide visual feedback about the states of the \texttt{MCP23017}'s and \esp8266's interrupts.
+
+  \item \textbf{Use jumpers to connect one terminal of each button to \texttt{GND}, and the other terminals to \texttt{MCP23017} \gpios 4 and 7.}
+
+  \item \textbf{Download the \Micropython driver for the \texttt{MCP23017} by \texttt{@mcauser}, \htmladdnormallink{\texttt{mcp23017.py}}{https://github.com/publicsensors/IntroSensors/blob/main/Codes/mcp23017.py}, and copy it onto your microcontroller.}
+
+	Explanations of this code, along with examples, are at his \htmladdnormallink{github repository}{https://github.com/mcauser/micropython-mcp23017}.
+
+	\item \textbf{Download the \texttt{mcp\textunderscore count.py} script, and copy it onto your microcontroller.}
+	\lstinputlisting[language=Python,label=sd_hello,caption={\htmladdnormallink{\texttt{mcp\textunderscore count.py}}{https://github.com/publicsensors/IntroSensors/blob/main/Codes/mcp_count.py}: An example demonstrating use of an \texttt{MCP23017} \i2c I/O expander to increment and decrement a counter, with LED feedback, on button pushes.}]{Codes/mcp_count.py}
+
+\end{enumerate}
+
+Before proceeding, it is important to understand what the \texttt{mcp\textunderscore count.py} script does and how it works.
+
+It effect is simple:
+When the button labeled \texttt{Switch \#1} is pressed, illuminate LED \#1.
+When  \texttt{Switch \#1} is released, increment the counter by 1.
+When the button labeled \texttt{Switch \#2} is pressed, illuminate LED \#2.
+When  \texttt{Switch \#2} is released, decrement the counter by 1.
+
+What are the steps in performing these tasks?
+\begin{itemize}
+\item Lines 1-2 import the necessary modules.
+\item Lines 4-5 create \i2c and \texttt{MCP23017} objects.
+\item Lines 7-8 create a global variable, \texttt{count}, which will act as a counter to keep track of button pushes.
+It is initialized to 0, and declared to be \texttt{global} so that the same instance will be used both inside and outside the callback function.
+\item Lines 10-11 command the \texttt{MCP23017} to set the state of \gpios 4 and 7 to act as inputs, to be pulled up, and to trigger the \texttt{MCP23017}'s internal interrupt when they change state.
+These commands use one of three different ways of sending commands to the \texttt{MCP23017}, as explained in \htmladdnormallink{the documentation}{https://github.com/mcauser/micropython-mcp23017}.
+\item Lines 13-32 define a function, \lstinline{mcp_counter}, to be used as a callback for the interrupt.
+The purpose of this function, explained in more detail below, is to check whether the interrupt on the \texttt{MCP23017} has been triggered.
+If it has, the function checks the button positions and, when appropriate, illuminates an LED or updates the counter.
+\item Lines 34-35 create and initialize an interrupt.
+Unlike the interrupt in \refsec{interrupt}, which was triggered by a button push, this interrupt fires off at regular intervals (once every 50 milliseconds) based on a timer.
+Because the \texttt{MCP23017} \gpios can be accessed only through the \i2c bus, it is not possible to have them directly trigger an interrupt on the microcontroller.
+\end{itemize}
+
+Each time the callback \lstinline{mcp_counter} is called (that is, once every 50 milliseconds) the \texttt{MCP23017} is queried whether its interrupt has been triggered,
+This is done by reading the value returned by the \lstinline{interrupt_triggered_gpio} method (port 0 refers to \gpios 0-7; port 1 refers to \gpios 8-15).
+
+In lines 10-11, \gpios 4 and 7 (the ones attached to Switches \#1 and \#2 in \reffig{i2c_IO}) are enabled to trigger the interrupt.
+These \gpios are pulled high by weak internal resistors when the buttons are not being pressed (by the \lstinline{pullup=1} flag in the pin definitions).
+Pressing the button connects the \gpio to \texttt{GND}, changing its state to low.
+Releasing enables it to go high again.
+Therefore, each time one of these buttons is pressed or released, an interrupt is triggered.
+
+The \texttt{MCP23017} signals that no interrupt has been triggered by returning a 0.
+In this case, the callback function \lstinline{mcp_counter} ends without doing anything.
+
+The \texttt{MCP23017} signals that an interrupt \emph{has} been triggered by returning the value of the \gpio that triggered it.
+In this case, if \gpio 4 (Switch \#1) triggered the interrupt, the \texttt{MCP23017} returns $2^4$, which is 16.
+If \gpio 7 (Switch \#2) triggered the interrupt, it returns $2^7$, which is 128.
+This value is recorded in the function as \lstinline{inttrig0}, and printed out so you can see the IC's response.
+The \texttt{if} statements, lines 20 and 26, separate out responses for each of these buttons.
+
+A key part of the \lstinline{mcp_counter} function is responding differently to button presses and button releases.
+If it did not, \texttt{count} would be incremented or decremented by 2 rather than 1 when a button is pressed and then released.
+How can the \lstinline{mcp_counter} function determine whether a button has been pressed or released?
+
+If the interrupt has been triggered, \lstinline{mcp_counter} queries the \texttt{MCP23017} for the value returned by the \lstinline{interrupt_captured_gpio} method.
+This value is a byte, whose 8 bits correspond to the state 8 \gpios on the specified port \emph{when the interrupt was triggered}.
+For port 0, as in this case, this means the first bit represents \gpio 0, the second bit represents \gpio 1, \etc
+This value is recorded in the function as \lstinline{intcap0}, and also printed out.
+
+When neither button is pressed, both \gpios 4 and 7 are pulled high.
+In that case, \lstinline{intcap0} has the value \lstinline{0b10010000}.
+In that value, the 4\textit{th} and 7\textit{th} bits are 1s, and the other bits are 0s.
+
+If either (or both) the buttons are pressed, the bits for the corresponding \gpios are changed to 0s.
+For example, if \gpio 4 is pressed but \gpio 7 is not, \lstinline{intcap0} has the value \lstinline{0b10000000}.
+If only \gpio 7 is pressed, \lstinline{intcap0} has the value \lstinline{0b00010000}.
+
+The expression \lstinline{(intcap0 & 2**4)} tests whether the bit corresponding to \gpio 4 is on, by finding bits that are on in \emph{both} \lstinline{intcap0} \emph{and} \lstinline{0b00010000} (which is the byte representing $2^4 = 16$).
+Similarly, the expression \lstinline{(intcap0 & 2**7)} tests whether the bit corresponding to \gpio 7 is on, by finding bits that are on in \emph{both} \lstinline{intcap0} \emph{and} \lstinline{0b10000000} (which is the byte representing $2^7 = 128$).
+
+When these values indicate the respective buttons are being pushed, the script turns on the appropriate LED (using \gpio 8 for LED \#1 and \gpio 9 for LED \#2).
+This is done using alternative syntax, described in \htmladdnormallink{the documentation}{https://github.com/mcauser/micropython-mcp23017}.
+
+To see the outcome of all this logic:
+\begin{enumerate}[resume]
+	\item \textbf{Import the \texttt{mcp\textunderscore count.py} script; then, press and hold each of the buttons and observe the output.}
+
+	This will give a sequence something like this:
+  \begin{lstlisting}[language=Python]
+	>>> import mcp_count
+	>>> inttrig0 =  16
+	intcap0 =  128 0b10000000
+	count =  0
+	inttrig0 =  16
+	intcap0 =  144 0b10010000
+	count =  1
+	inttrig0 =  16
+	intcap0 =  128 0b10000000
+	count =  1
+	inttrig0 =  16
+	intcap0 =  144 0b10010000
+	count =  2
+	inttrig0 =  128
+	intcap0 =  16 0b10000
+	count =  2
+	inttrig0 =  128
+	intcap0 =  144 0b10010000
+	count =  1
+	inttrig0 =  128
+	intcap0 =  16 0b10000
+	count =  1
+	inttrig0 =  128
+	intcap0 =  144 0b10010000
+	count =  0
+\end{lstlisting}
+
+\end{enumerate}
+
+
+
+
+% \loadMilestone{mlst:05d} % load milestone with tags id: mlst:04c
+
+
+
+
+
 
 \subsection{Using System Management Bus (\smbus) devices}
 \labsec{i2c_smbus}
