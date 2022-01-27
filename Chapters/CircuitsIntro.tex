@@ -33,7 +33,7 @@ In this case, the length of time between an initial event --- sending out a puls
 Calibrated by a knowledge of the speed of sound, this travel time indicates distance.
 
 The following sections explain some electrical principles that you need to understand when working with voltage-based environmental sensors. You will apply that knowledge to measure battery voltage (an important parameter in a field-deployed device!) and thermistor temperature. You will then use time-based sensors to measure distance and light, and combine both time and voltage to measure wind or current velocity.
-\todo{Textbox explaining font conventions for code, units and electrical quantities.}
+%\todo{Textbox explaining font conventions for code, units and electrical quantities.}
 
 %like the \texttt{3V3} pin in your \refch{first_exercises} circuits),
 %The data connection takes on a voltage anywhere between
@@ -48,16 +48,17 @@ The following sections explain some electrical principles that you need to under
 \labsec{meas_volt}
 Voltage is measured on a microcontroller using an \texttt{Analog to Digital Conversion} (\adc) pin.
 \adc pins act as inputs, just as digital \texttt{GPIO} pins do in their input modes.
-However, reading the value of a digital \texttt{GPIO} pin results in either 1 or 0 (``high'' or ``low''). In contrast, an \adc pin returns an integer that can span a range, e.g. between 0 and 1024.
-That integer's value is proportional to the voltage applied to the \adc pin.
+However, reading the value of a digital \texttt{GPIO} pin results in either 1 or 0 (``high'' or ``low'').
+In contrast, an \adc pin returns an integer, often referred to as a \emph{count}, that can span a range, e.g. between 0 and 1023 for an 8-bit ADC (as on an ESP8266) or between 0 and 8191 for a 13-bit ADC (as on an ESP32-S2).
+The count's value is proportional to the voltage applied to the \adc pin.
 
-For example, in \htmladdnormallink{\texttt{Analog to Digital Conversion} on the ESP8366}{http://docs.micropython.org/en/v1.9.3/esp8266/esp8266/quickref.html\#adc-analog-to-digital-conversion}, an \adc value of 0 implies \texttt{0V}, \adc value of 1024 implies \texttt{1V}, and \adc value of 113 implies $\frac{113}{1024} \times 1\mathtt{V}$ or \texttt{0.11V}.
+For example, in \htmladdnormallink{\texttt{Analog to Digital Conversion} on the ESP8266}{http://docs.micropython.org/en/v1.9.3/esp8266/esp8266/quickref.html\#adc-analog-to-digital-conversion}, an \adc value of 0 implies \texttt{0V}, \adc value of 1023 implies \texttt{1V}, and \adc value of 113 implies $\frac{113}{1024} \times 1\mathtt{V}$ or \texttt{0.11V}.
 In general,
 \begin{equation}\label{adc_volt}
-V = \frac{ADC}{1024}
+V = V_{max}\frac{C_{ADC}}{C_{max}+1}
 %V \mathsf{V} \mathrm{V} = \frac{ADC}{1024} \frac{\mathsf{ADC}}{1024} \frac{\mathrm{ADC}}{1024}
 \end{equation}
-for the \texttt{ESP8266}, where $ADC$ is the integer value read from the \adc pin, and $V$ is the applied voltage in units of \texttt{volts}
+ where $C_{ADC}$ is the integer value read from the \adc pin, $V$ is the applied voltage in units of \texttt{volts}, $V_{max}$ is the maximum voltage  that the \adc can sense, and ${C_{max}}$ is the maximum count of the \adc
 \sidenote[][*-8]{
 	\begin{kaobox}[backgroundcolor=\SNcolor,frametitlebackgroundcolor=\SNcolor,frametitle=Resolve to change!]
 		An important implication of Equation \ref{adc_volt} is a limit to the \htmladdnormallink{\emph{resolution}}{https://www.itl.nist.gov/div898/handbook/mpc/section4/mpc451.htm} of the \texttt{ESP8266}'s \adc.
@@ -85,14 +86,14 @@ Monitoring battery voltage with an \adc that measures voltage seems like an easy
 Well, it \emph{is} pretty easy.
 But, there's a wrinkle we need to contend with: \adcs have strict limits to how large a voltage they can tolerate.
 In fact, for many types of microcontroller these limits are quite low.
-For \texttt{ESP8266}s, the limit is \texttt{1V}.
-That's much lower than even a mostly discharged \texttt{18650} battery's voltage.
-If we attach the terminals of an \texttt{18650} directly to an ESP8266 \adc, we risk destroying the \adc and possibly other components as well.
+For \texttt{ESP8266}s, the limit is \texttt{1V}, and for \texttt{ESP32} and \texttt{ESP32-S2} chips, the default limit is even lower--as low as \texttt{0.75V} for the \texttt{ESP32-S2}.  However, thankfully, for the \texttt{ESP32} chips, this can be reconfigured in software to as much as approximately \texttt{2.5V}.
+In any case, that's much lower than even a mostly discharged \texttt{18650} battery's voltage.
+If we attach the terminals of an \texttt{18650} directly to an \texttt{ESP}'s \adc, we risk the destruction of the \adc and possibly other components as well.
 
-We need a way to \emph{represent} the voltage of an \texttt{18650} with a voltage that we know will never exceed \texttt{1V}.
+We need a way to \emph{represent} the voltage of an \texttt{18650} with a voltage that we know will never exceed the maximum allowable voltage for the \adc.
 To accomplish this, we'll create a sensor in the typical 3-connection analog format: \texttt{GND}, $V_{in}$ and $V_{data}$.
 In this sensor, \texttt{GND} and $V_{in}$ will come from the \texttt{18650} terminals.
-$V_{data}$ will come from the circuit we're about to design, in such a way as to insure that it accurately represents battery voltage according to a known calibration while staying within the \texttt{1V} limit.
+$V_{data}$ will come from the circuit we're about to design, in such a way as to insure that it accurately represents battery voltage according to a known calibration while staying within the limit.
 
 \subsubsection{Ohm's Law for voltage, current and resistance}
 The design of our current sensor is based on one of the fundamental laws governing electricity, \htmladdnormallink{Ohm's Law}{https://en.wikipedia.org/wiki/Ohm\%27s\_law}.
@@ -201,7 +202,8 @@ A voltage divider is a simple circuit composed of two resistors, connected in \e
 \end{figure}
 
 
-\todo{Textbox contrasting series and parallel connections.}
+%\todo{Textbox contrasting series and parallel connections.}
+
 A voltage divider has the same 3-connection configuration as most analog sensors.
 The open ends of the resistor pair are connected to voltage inputs, $V_{in}$ on the left side and \texttt{GND} on the right.
 %In our case, one is connected to \texttt{GND} (\texttt{0V}), and the other to $V_{in}$.
@@ -244,8 +246,8 @@ V_{data} = V_{in} \frac{R_2}{R_1+R_2}
 \end{equation}
 That is, $V_{data}$ is always a fixed fraction of $V_{in}$, and that fraction is the same as the fraction $R_2$ represents of the total resistance $R_1+R_2$.
 
-Equation \ref{vd4} is the information we need to design a voltage divider enabling an ESP8266 \adc to safely measure the voltage of an \texttt{18650} battery.
-To leave a margin of safety, we'll assume the highest voltage an \texttt{18650} can reach is $V_{in}=5V$. Then, to meet the \texttt{1V} limit on $V_{data}$ (the \adc pin), our circuit must have
+Equation \ref{vd4} is the information we need to design a voltage divider enabling an \texttt{ESP}'s \adc to safely and accurately measure the voltage of an \texttt{18650} battery.
+To leave a margin of safety, we'll assume the highest voltage an \texttt{18650} can reach is $V_{in}=5V$. Then, to meet a limit on $V_{data}$ (the \adc pin) of say \texttt{1V}, our circuit must have
 \begin{equation}\label{vd5}
 V_{data} = V_{in} \frac{R_2}{R_1+R_2}  \le 1 .
 \end{equation}
@@ -257,7 +259,7 @@ Again simplifying, we find that whenever
 R_2 \le \frac{R_1}{V_{in}-1} %= \frac{R_1}{4}
 %R_2 \le \frac{R_1}{4}
 \end{equation}
-the output voltage $V_{data}$ will be both proportional to $V_{in}$ and within the tolerance of the ESP8266 \adc.
+the output voltage $V_{data}$ will be both proportional to $V_{in}$ and within the tolerance of any \texttt{ESP}-family \adc.
 In this case, $V_{in}-1 = 4$, so if $R_2$ is less than $\frac{R_1}{4}$ the voltage tolerance is satisfied.
 
 Having measured $V_{data}$, we will then be able to infer $V_{in}$ by solving for it in Equation \ref{vd4},
@@ -265,6 +267,23 @@ Having measured $V_{data}$, we will then be able to infer $V_{in}$ by solving fo
 V_{in} = V_{data} \frac{R_1+R_2}{R_2}.
 \end{equation}
 Here, the proportionality constant $\frac{R_1+R_2}{R_2}$ is the \emph{theoretical} calibration for our analog voltage sensor.
+
+\begin{kaobox}[frametitle=How to determine the value of a resistor]
+The easiest way to identify the value of a resistor is probably to use a multimeter set to the \si{\ohm} setting.  
+The meter will provide the value of the resistor when the two terminals are connected across the resistor.
+
+Resistor values are often written using the SI units of \si{\kohm} or \si{\Mohm}.  
+The prefixes k and M mean the same thing as for any other SI unit--k (\emph{kilo}) corresponds with thousands, and M (\emph{mega}) corresponds with millions. 
+So the resistance for a 23,000 \si{\ohm} resistor would normally be given as \num{23} \si{\kohm}.
+Sometimes this is shortened to just "\num{23} k".
+  
+Multimeters often display only thousands or millions of ohms, not the entire number.
+What is displayed depends on the sensitivity setting of the dial on the meter.
+When the dial is on a setting ending with "k", the output is given in \si{\kohm}, and when the dial is on a setting ending with "M", the output is given in \si{\Mohm}.
+For instance, if a meter on the 20k setting displays the number 1.52, we would know that the resistance is 1.52 \si{\kohm} = \num{1.52e3} \si{\ohm}.  
+
+Resistors are labeled with \htmladdnormallink{colored bands}{https://en.wikipedia.org/wiki/Electronic\_color\_code} that indicate their resistance values. Online calculators, such as \htmladdnormallink{Digi-Key's Color Code Calculator}{https://www.digikey.com/en/resources/conversion-calculators/conversion-calculator-resistor-color-code-4-band} make it easy to translate these bands into numerical resistance values.
+\end{kaobox}
 
 An additional consideration --- power consumption --- helps us choose among the many possible resistor values, $R_1$ and $R_2$, that satisfy Equation \ref{vd6}.
 As current flows through a resistor, some of the electrical power is converted to heat.
@@ -280,7 +299,7 @@ W = \frac{V_{in}^2}{R_1+R_2}
 That is, the power dissipated across both resistors of the voltage divider equals the square of the imposed voltage, divided by the total resistance.
 This tells us that, for a given voltage, higher values of $R_1+R_2$ mean less power dissipated.
 In a battery-powered field instrument, less dissipated power is generally a good thing --- it may mean that instruments can collect data for longer.
-This suggests that, among resistor combinations that satisfy  Equation \ref{vd6}, those combinations in which $R_1+R_2$ is larger will be more economical of power.
+This suggests that, among resistor combinations that satisfy Equation \ref{vd6}, those combinations in which $R_1+R_2$ is larger will be more economical of power.
 
 Note that there are limits to reducing power losses by increasing $R_1+R_2$.
 That is because the \adc pin, when measuring voltage, draws a tiny amount of current itself (the exact amount is poorly documented).
@@ -291,7 +310,11 @@ But, sufficiently high resistor values will make the total current so small that
 \labsec{vd_design}
 With these insights into the working principles of voltage dividers, you are now equipped to design your own voltage dividing circuit to measure \texttt{18650} battery voltage with your ESP8266's \adc.
 In this design process, you will consider alternative choices of resistors.
-You will exclude resistor combinations that exceed the \adc's voltage tolerance.
+You will exclude resistor combinations that exceed the voltage tolerance for the \adc on your chip (\texttt{1V} for the \texttt{ESP8266}, \texttt{2.45V} for the \texttt{ESP32}, and \texttt{2.5V} for the \texttt{ESP32-S2})\sidenote[][*0]{
+	\begin{kaobox}[backgroundcolor=\SNcolor,frametitlebackgroundcolor=\SNcolor,frametitle=The \adc Danger Zone]Note that for the \texttt{ESP32} and \texttt{ESP32-S2}, exceeding the allowable voltage while remaining below the microcontroller's input voltage of \texttt{3.3V} simply causes the ADC to return $C_{max}$ and does not damage the chip itself.  However, for the \texttt{ESP8266}, it is important to never go beyond the \adc's \texttt{1V} tolerance even by a little.
+	\end{kaobox}
+}.
+
 Among the remaining combinations, you will calculate power consumption and estimate the resolution %accuracy and precision
 of its voltage measurements, as a basis for a final selection of resistors for your circuit design.
 Then, in \refsec{vd_assem}, you will assemble your voltage divider design and assess its accuracy and precision.
@@ -300,7 +323,6 @@ Then, in \refsec{vd_assem}, you will assemble your voltage divider design and as
 
 	Most resistor packages contain a wide range of resistances, spanning several orders of magnitude.
 	These often come as series of different orders of magnitude, such as $10 \Omega$, $100 \Omega$, $1\mathtt{K} \Omega$, $10\mathtt{K} \Omega$, $100\mathtt{K} \Omega$, $1 \mathsf{M} \Omega$, or $47 \Omega$, $470 \Omega$, $4.7\mathtt{K} \Omega$, $47\mathtt{K} \Omega$, $470\mathtt{K} \Omega$, $4.7 \mathsf{M} \Omega$, \etc
-	\todo{textbox explaining K and M notation.}
 
 	\smallskip
 	As an example, we'll assume here that we have four resistors: $10 \Omega$, $100 \Omega$, $47\mathtt{K} \Omega$ and $470\mathtt{K} \Omega$.
@@ -387,7 +409,7 @@ Then, in \refsec{vd_assem}, you will assemble your voltage divider design and as
 	Then, enter the formula \lstinline{=F2<1} in the spreadsheet cell below \texttt{Vdata<1?}.
 	Here, again, the  ``='' tells the spreadsheet you will enter a formula.
 	In this case, though, the formula is a logical statement, \lstinline{F2<1}, that is either true or false.
-	This formula uses the result from the \texttt{Vdata} column; it returns \texttt{TRUE} if $V_{data} < 1$ \texttt{volt} and the voltage divider is safe for the ESP8266's \adc.
+	This formula uses the result from the \texttt{Vdata} column; it returns \texttt{TRUE} if $V_{data} < 1$ \texttt{volt} and the voltage divider is safe for any \texttt{ESP}-based \adc.
 	\begin{table}[H]
 	\centering \begin{small}
 	\begin{tabular}{|c|c|c|c|c|c|c|c|c|}
@@ -429,7 +451,11 @@ Then, in \refsec{vd_assem}, you will assemble your voltage divider design and as
 	Let's use the quantity $V_{res}$ to denote the smallest input voltage change we can resolve with our voltage divider/\adc combination --- that is, its \emph{resolution}.
 
 	\smallskip
-	In Equation \ref{adc_volt2}, we calculated that the theoretical resolution of the \texttt{ESP8266}'s \adc is $\frac{1}{1024}$, or just under $10^{-3}$ \texttt{volts}.
+	Theoretically, the resolution $\Delta V$ of any \adc can be computed using 
+	\begin{equation}\label{resolution}
+	\Delta V_{data} = \frac{V_{ref}}{C_{max}+1}.
+	\end{equation}
+	For the \texttt{ESP8266}, with $V_{ref}= 1 \si{V}$ and $C_{max} = 1023$, this comes to just under $10^{-3}$ \texttt{volts}.
 	What does this imply for our calculation of  $V_{res}$?
 %	\begin{table}[H]
 %	\centering
@@ -452,7 +478,7 @@ Then, in \refsec{vd_assem}, you will assemble your voltage divider design and as
 	\begin{equation}\label{vd9}
 	\Delta V_{in} =  \Delta V_{data} \frac{V_{in}}{V_{data}}.
 	\end{equation}
-	Equation \ref{vd9} tells us that, if the smallest measurable \adc voltage change is $\Delta V_{data_{min}}=\frac{1}{1024}$, then the smallest measurable input voltage change, $\Delta V_{in_{min}}=V_{res}$, must be
+	Equation \ref{resolution} tells us that, if the smallest measurable \adc voltage change is $\Delta V_{data_{min}}=\frac{V_{ref}}{C_{max}+1}$, then, for an \texttt{ESP8266} the smallest measurable input voltage change, $\Delta V_{in_{min}}=V_{res}$, must be
 	\begin{equation}\label{vd8}
 	V_{res} = \frac{1}{1024} \frac{V_{in}}{V_{data}} = \frac{1}{1024} \frac{R_1+R_2}{R_2}.
 \end{equation}
@@ -466,7 +492,7 @@ Then, in \refsec{vd_assem}, you will assemble your voltage divider design and as
 %	\begin{equation}\label{vd8}
 %	\Delta V_{in} = \frac{V_{in}}{1024 V_{data}}.
 %	\end{equation}
-	To implement this calculation in your spreadsheet, enter the formula \lstinline{=(1/1024)*(B2+C2)/C2} in the spreadsheet cell below \texttt{Vres}.
+	To implement this calculation in your spreadsheet, enter the formula \lstinline{=(1/1024)*(B2+C2)/C2} in the spreadsheet cell below \texttt{Vres}. Be sure to change the values $V_{ref}$ and $C_{max}$ to correspond with the microcontroller you are using.
 	\begin{table}[H]
 	\centering
 	\begin{small}
@@ -528,12 +554,6 @@ An example breadboard layout is given in \reffig{feather_voltage_divider2}.
 Here's the step-by-step (\underline{be sure to do these in order}):
 \begin{enumerate}
 	\item \textbf{Select, label and test the resistors $R_1$ and $R_2$.}
-
-	Resistors are labeled with \htmladdnormallink{colored bands}{https://en.wikipedia.org/wiki/Electronic\_color\_code} that indicate their resistance values.
-	Online calculators, such as \htmladdnormallink{Digi-Key's Color Code Calculator}{https://www.digikey.com/en/resources/conversion-calculators/conversion-calculator-resistor-color-code-4-band} make it easy to translate these bands into numerical resistance values.
-
-	\smallskip
-	Even easier is to use a multimeter.
 	\begin{itemize}
 		\item[$\circ$] Choose resistors for the $R_1$ and $R_2$ values you identified as yielding the best voltage divider characteristics.
 		\item[$\circ$] Measure the actual resistances using the multimeter.
@@ -565,18 +585,56 @@ Here's the step-by-step (\underline{be sure to do these in order}):
 	\item \textbf{Test your connections!}
 
 	At this point, there is voltage across the voltage divider.
-	To insure your circuit is safe for your \texttt{ESP8266}'s \adc, confirm that:
+	To insure your circuit is safe for your \adc, confirm that:
 	\begin{itemize}
 		\item[$\circ$] Voltage across the free ends of $R_1$ and $R_2$ is in the range of \texttt{+3.6} to \texttt{+4.3 volts}.
-		\item[$\circ$] Voltage across $R_2$ is in the range of \texttt{0} to \texttt{+1 volts}.
+		\item[$\circ$] Voltage across $R_2$ is in the range of \texttt{0} to \texttt{V\textsubscript{ref}} (\texttt{0} to \texttt{+1 volts} on an \texttt{ESP8266}, \texttt{0} to \texttt{+2.45 volts} on an \texttt{ESP32}, or \texttt{0} to \texttt{+2.5 volts} on an \texttt{ESP32-S2} ).
 	\end{itemize}
 	\textbf{IF EITHER OF THESE IS NOT TRUE, DO NOT PROCEED UNTIL YOU HAVE IDENTIFIED AND CORRECTED THE PROBLEM}.
 
-	\item \textbf{Use a jumper to connect your \texttt{ESP8266} \texttt{GND} pin to the negative rail.}
+	\item \textbf{Use a long jumper to connect your \adc pin to the row with both $R_1$ and $R_2$ connections (\texttt{Vdata}).}
+	Unfortunately \texttt{ESP32} and \texttt{ESP32-S2} can only access the ADC on a subset of pins that differ from board to board. This means there is no single diagram can show hookup connections required for all three boards \sidenote[][*]{
+	\begin{kaobox}[backgroundcolor=\SNcolor,frametitlebackgroundcolor=\SNcolor,frametitle=Where are the useable \adc pins?]
+	 The useable ADC \texttt{gpio} pins for each system, along with the pins these map to on the Feather form factor, are:
+	\begin{table}[H]
+	\centering \begin{small}
+	\begin{tabular}{c c }
+		\multicolumn{2}{l}{ESP32} \\
+		\hline
+		\textbf{\texttt{gpio}}  & \textbf{Feather} \\
+		\hline
+		34  & A2 \\
+		39  & A3 \\
+		36  & A4 \\
+		33  & 33 \\
+		32  & 32 \\
+		\hline
+	\end{tabular}
+	\end{small}
+	\end{table}
+	\begin{table}[H]
+	\centering \begin{small}
+	\begin{tabular}{c c }
+		\multicolumn{2}{l}{ESP32-S2} \\
+		\hline
+		\textbf{\texttt{gpio}}  & \textbf{Feather} \\
+		\hline
+		5  & D5 \\
+		6  & D6\\
+		8  & A5 \\
+		9  & D9 \\
+		10  & D10 \\
+		\hline
+	\end{tabular}
+	\end{small}
+	\end{table}
+	\end{kaobox}
+} 
+
+	\item \textbf{Use a jumper to connect your microcontroller's \texttt{GND} pin to the negative rail.}
 
 	When you establish this connection, it insures that the ``zero'' voltage (\texttt{GND}) is the same for the battery, voltage divider and microcontroller.
 
-	\item \textbf{Use a long jumper to connect your \texttt{ESP8266}'s \adc pin to the row with both $R_1$ and $R_2$ connections (\texttt{Vdata}).}
 \end{enumerate}
 
 	The hardware assembly is now complete.
@@ -586,17 +644,48 @@ Here's the step-by-step (\underline{be sure to do these in order}):
 	\item \textbf{Connect a USB cable to your microcontroller, an open a \texttt{REPL} session.}
 
 	\item \textbf{Create an \adc object, and use it to query the voltage of $V_{data}$.}
+
+	Unfortunately, the syntax and definition of the \texttt{gpio} pin associated with pin A0 differs between \texttt{ESP8266}, \texttt{ESP-32}, and \texttt{ESP32-S2} feather-based microcontrollers.   Snippets are given here for each board, assuming the data pin is connected to the ADC pin indicated.
+
+\textbf{\texttt{ESP8266} Snippet, assuming data pin connected to \texttt{Pin A0}:}
 \begin{lstlisting}[language=Python]
 from machine import ADC   # import the ADC module
 adc = ADC(0)              # create an ADC object
 adc.read()    # read the ADC and print the result
 \end{lstlisting}
 
+\textbf{\texttt{ESP32} Snippet, assuming data pin connected to \texttt{Pin A2}:}
+\begin{lstlisting}[language=Python]
+from machine import ADC, PIN   # import the ADC and PIN modules
+adc = ADC(Pin(34))            # create an ADC object on gpio26 (Feather pin A0)
+adc.read()    # read the ADC and print the result
+\end{lstlisting}
+
+\textbf{\texttt{ESP32-S2}  Snippet, assuming data pin connected to \texttt{Pin A5}::}
+\begin{lstlisting}[language=Python]
+from machine import ADC, PIN   # import the ADC and PIN modules
+adc = ADC(Pin(8))            # create an ADC object on gpio8 (Feather pin A5)
+adc.read()    # read the ADC and print the result
+\end{lstlisting}
+
+
 	\item \textbf{On your laptop or desktop, write a Micropython function that prints the battery voltage, $V_{in}$.}
 
 	Use the following code to define your function, replacing the example resistor values with the correct values for your voltage divider:
 
-	\lstinputlisting[language=Python,label=BatteryVoltage,caption={\htmladdnormallink{\texttt{BatteryVoltage.py}}{https://github.com/publicsensors/IntroSensors/blob/main/Codes/BatteryVoltage.py}: A Python function to calculate battery voltage using the \adc and a voltage divider.}]{Codes/BatteryVoltage.py}
+\begin{lstlisting}[language=Python]
+from machine import ADC, Pin
+try:
+    adc = ADC(0)
+except:
+    adc = ADC(Pin(8))
+    adc.atten(ADC.ATTN_11DB)
+def battery_voltage(adc, Cmax, Vref,R1=470., R2=47.):
+    vdata=adc.read()/Cmax*Vref
+    vin = vdata*(R1+R2)/R2
+    return vin
+\end{lstlisting}
+
 
 	\item \textbf{Execute your function on your microcontroller.}
 
@@ -627,6 +716,71 @@ battery_voltage(R1=470.,R2=47.)
 %	\item how-to: design a voltage divider
 %	\item how-to: build a voltage divider
 %\end{itemize}
+\newpage
+
+\subsection{Calibrating maximum voltage of ADC}
+
+So far, we've assumed that the specifications for your microcontroller allow you to know, with great precision, the voltage $V_{ref}$ that is associated with the maximum count $C_{max}$ on your microcontroller.
+However, this value can vary from \texttt{ESP} board to \texttt{ESP} board, even within a given model.
+For precise measurements to be possible, this value should be known to more than the one or two significant digits provided in the manufacturer's documentation.
+  
+\begin{marginfigure}[-5cm]
+	\begin{center}
+		\includegraphics[height=7cm]{Images/check_vref2.png}
+		\caption[Checking reference voltage]{Circuit for checking the internal reference voltage for \adc.}
+		\labfig{vref}
+	\end{center}
+\end{marginfigure}
+
+Thankfully, it's straightforward to use the circuit you developed for measuring battery voltage, in combination with the 3.3V power supply for your device, to develop this estimate. To accomplish this, set up a voltage divider on a breadboard (\reffig{vref}), with the high voltage to the voltage divider coming out of the \texttt{3.3V} pin. Feather-based breakout boards provide a fairly stable voltage on this pin that should be quite close to \num{3.3} \si{\volt} (although feel free to measure this with a multimeter set to the DC voltage setting).  Use resistors that divide this down so that the voltage $V_{data}$ is known.  Once a measurement is made, we can now compute the internal reference voltage using the simple relationship
+
+	\begin{equation}\label{voltage_ratio}
+		\frac{V_{data}}{V_{ref}} = \frac{C_{ADC}}{C_{max}}
+	\end{equation}
+
+where $C_{ADC}$ is the actual count returned by the \adc. Using the known value of $V_{data}=3.30 R2/(R1+R2)$, it is straightforward to solve for $V_{ref}$,
+
+	\begin{equation}\label{vref}
+		V_{ref} = 3.30\frac{R2}{R1+R2}\frac{C_{max}}{C_{ADC}}
+	\end{equation}
+
+This can be solved programmatically using the following code, although note that pin assignments may need to be adjusted to match the specific ADC pin being used in your implementation.
+
+\begin{lstlisting}[language=Python]
+#import libraries
+import machine
+from machine import Pin, ADC
+import time
+
+#specify parameters
+n = 20 #number of samples to average
+R1 = 10000
+R2 = 10000
+v33 = 3.30
+#compute v_data
+v_data = 3.3*R2/(R1+R2)
+
+#initialize ADC
+try:
+    #works for ESP8266
+    adc = ADC(0)
+    maxcount = 1023
+except:
+    #works for ESP32
+    adc = ADC(Pin(5))
+    adc.atten(ADC.ATTN_11DB)
+    maxcount = 8191  #4095 if ESP32
+
+#Collect n measurements, average, and print results
+total = 0
+for i in range(20):
+    total = total + adc.read()
+    time.sleep(0.2) #necessary to give ADC time to reset
+c_adc_av = total / n 
+v_ref = v_data * maxcount / c_adc_av
+print(f"n = {n}, average ADC count = {c_adc_av}, average Vref = {v_ref}")
+\end{lstlisting}
+
 
 \section{Environmental sensing with voltage: measure temperature with a thermistor}
 \labsec{cal_therm}
@@ -751,8 +905,9 @@ Substitute the values you obtain from your thermistor into these calculations.
 	We leave it to your ingenuity to come up with effective, creative solutions to the materials you have on hand.
 
 	\smallskip
-	We'll illustrate with two examples, both of which are inexpensive and easily obtained $10k\Omega$ thermistors.\todo{pictures of Thermistors A and B}
-	However, many other thermistor types and water bath arrangements are workable.
+	%We'll illustrate with two examples, both of which are inexpensive and easily obtained $10k\Omega$ thermistors.\todo{pictures of Thermistors A and B}
+	%However, many other thermistor types and water bath arrangements are workable.
+	Handling thermistors experimentally depends on their thermal mass and waterproofing.  Consider two models of thermistor, one, \texttt{Thermistor A}, that is just the bare thermistor, and the other, \texttt{Thermistor B}, that has been waterproofed by its manufacturer.
 	\begin{itemize}
 		\item[$\circ$] \texttt{Thermistor A} is a ``bead'' thermistor, with two bare wires.
 		This kind of thermistor responds quickly to temperature changes, but is not protected from water or other corrosive or conductive liquids.
@@ -815,7 +970,7 @@ Substitute the values you obtain from your thermistor into these calculations.
 
 
 \subsection{Thermistor circuit design}
-To design a circuit that effectively uses a thermistor to measure environmental temperatures, you will use the tools you developed in the last two sections: A calibration enabling you to calculate your thermistor's resistance across the relevant range of temperatures, and a spreadsheet enabling you to calculate which resistor combinations satisfy the \texttt{ESP8266}'s \adc voltage tolerance.
+To design a circuit that effectively uses a thermistor to measure environmental temperatures, you will use the tools you developed in the last two sections: A calibration enabling you to calculate your thermistor's resistance across the relevant range of temperatures, and a spreadsheet enabling you to calculate which resistor combinations satisfy your microcontroller's \adc voltage tolerance.
 
 There are two circuit configurations that you need to consider:
 \begin{itemize}
@@ -941,7 +1096,7 @@ In these circuit diagrams, the box with the diagonal line represents the thermis
 
 	\item \textbf{Explore alternative resistor values, by making copies of the two rows of calculations, and entering different values for \texttt{R2}.}
 
-	Does the new resistance value satisfy the \adc voltage tolerance?\sidenote[][*-25]{
+	Does the new resistance value satisfy the \adc voltage tolerance?\sidenote[][*12]{
 		\begin{kaobox}[backgroundcolor=\SNcolor,frametitlebackgroundcolor=\SNcolor,frametitle=Resist-metic]As we found in the voltage divider discussion, the total resistance of two resistors connected in \emph{series} (one connected end to end with the other) is simply the sum of their individual resistances: $R_{total}=R_1+R_2$.
 			You can use this fact if you want to use a resistor value that you don't have in hand.
 			For example, if you have $510\Omega$ and $220\Omega$ resistors, you can attach them in series to form a $510+220=730\Omega$ resistor.
@@ -1025,7 +1180,7 @@ Compared to the battery voltage circuit, the changes are:
 	At this point, the voltage divider should be powered up and operating as it would during temperature measurements.
 
 	\smallskip
-	IF THE CONDITION $0 \le V_{data} \le 1$ IS NOT MET, STOP AND DEBUG YOUR CIRCUIT.
+	IMPORTANT: IF USING AN \texttt{ESP8266}, IF THE CONDITION $0 \le V_{data} \le 1$ IS NOT MET, STOP AND DEBUG YOUR CIRCUIT.
 
 	\smallskip
 	Do not proceed until you've diagnosed and fixed the problem in the circuit --- it could destroy the \adc.
@@ -1077,10 +1232,280 @@ print('Thermistor temperature = ',T)
 %\end{itemize}
 
 
-\section{\color{gray} Environmental sensing with voltage: measuring electrical conductivity \color{black}}
-\labsec{light_freq}
-\subsection{color{gray}Electrical conductivity circuit assembly \color{black}}
-\subsection{color{gray}Electrical conductivity circuit calibration \color{black}}
+\section{Environmental sensing with voltage: measuring electrical conductivity}
+\labsec{ec}
+The \emph{electrical conductivity} (\texttt{EC}) of a substance represents its ability to transmit electrical current. For solids, metals are generally good conductors, with copper and aluminum being some of the best. However, it also turns out that other solid substances, including graphite, are conductive.  To confirm this, try connecting a multimeter set to measure resistance across both ends of a broken pencil.  If your multimeter makes good contact with the "lead" (really a graphite/clay mixture), you should see that the total resistance across an entire pencil is only a few \si{\ohm}. 
+
+Fluids can also conduct electricity to varying degrees. Some, like air, are particularly poor conductors that are usually referred to as insulators. Water, on the other hand, can be quite conductive, which is why we all know that it's a bad idea leave powered electrical appliances out in the rain.  The \texttt{EC} of water varies greatly with the concentration of dissolved electrolytes (salts). For this reason, \texttt{EC} measurements are often used to characterize water quality, and \texttt{EC} measurements frequently form the basis of measurements of the salinity of sea water. 
+
+\begin{marginfigure}[-5cm]
+	\begin{center}
+		\includegraphics[height=5cm]{Images/ec_cell.png}
+		\caption[Ideal EC cell]{An idealized electrical conductivity test cell. Current flows from one charged electrode to the other along a path of length $L$.}
+		\labfig{ec_cell}
+	\end{center}
+\end{marginfigure}
+
+\texttt{EC} is defined as the ability of a fixed volume of substance to transmit current in a single direction. A ideal conductivity measurement cell for a liquid substance might consist of a two planar electrodes, each having the surface area $A$ in contact with the liquid (Figure \reffig{ec_cell}. A perfect insulator would surround the prismatic region, so when one electrode is charged to a higher voltage than the other, all current would flow directly from electrode to electrode by following a single path length length $L$.  Conductivity $\kappa$ is defined as 
+
+\begin{equation}\label{eq:ec}
+	\kappa= \frac{L}{AR}
+\end{equation}
+
+where $R$ is the apparent resistance, in \si{ohm}, of the fluid between the two electrodes. While it's tempting to think of electrical conductivity as the inverse of resistance, that is not the case because the resistance in the test cell depends not only on the fluid (and hence it's \texttt{EC}) but also on the length between electrodes and the electrode area.  As $L$ increases, resistance would increase, and as $A$ increases, resistance would decrease. The best way to think of electrical conductivity, then, is as the property that when divided by the current path length, gives the inverse resistance per unit cross-sectional area of the fluid.  Several units are available for describing $\kappa$. In some references, the inverse of resistance is described using the unit \emph{Mho}, (obviously, a play on the word "Ohm", which makes it easy to remember), with 1 Mho = \si{1 \ohm^{-1}}.  However, the proper SI unit describing the inverse of resistance is a \emph{Siemen}, which is abreviated using the symbol S, again, with \si{1S = 1 \ohm^{-1}}. The basic SI unit for \texttt{EC}, then, is S/m, although \texttt{EC} is often reported in S/cm, or, quite commonly, $\mu$S/cm, which is a convenient unit for presenting \texttt{EC} of water. At typical temperatures, fresh water has \texttt{EC} in the 100-1000 $\mu$S/cm range, while seawater tends to be closer to 30,000 to 50,000 $\mu$S/cm.
+
+It is difficult (and unnecessary) to build test cells whose geometries perfectly match the idealized \texttt{EC} cell illustrated in \reffig{ec_cell}. Instead, it is quite common to completely immerse all sides of both electrodes (which could be just about any shape) in the fluid and then let multiple current flow pathways develop between the electrodes. It's not really possible to identify a single current path length $L$, so you might wonder how its possible to estimate \texttt{EC} from a cell constructed using arbitrarily-shaped electrodes. The standard approach is to identify \texttt{EC} by calibration, that is, but measuring the electrically properties of the cell at one or more known values of \texttt{EC}.  According to Equation \ref{eq:ec}, we expect that the apparent resistance $R$ across the cell to vary inversely with $\kappa$, so the most common approach is to assume that calibration data will follow a simple linear relationship. 
+
+\begin{equation}\label{eq:cell_const}
+	\kappa= kR^{-1}
+\end{equation}
+ 
+In Equation \ref{eq:cell_const}, the constant of proportionality $k$ is known as the cell constant.  It has dimensions L\textsuperscript{-1}, and it is normally found by calibration. Once $k$ is known for a given cell, all that is required to make an estimate of \texttt{EC} is to measure the apparent resistance across the cell.  
+
+Because the conductivity of water varies over many orders of magnitude, we generally can’t use the same probe for all measurements.  For low conductivity solutions, we need the electrodes to be relatively close together.  For high conductivity, they should be farther apart.  Probes with cell constant of between 1 and 10 cm\textsuperscript{-1} are appropriate for measuring the conductivity of estuarine water.  Probes with cell constants of 0.1, 1, and 10 cm are commonly available.  However, the estimate is never perfect, so the cell constant should really be found by calibration using a fluid with known $\kappa$.
+
+\texttt{EC} changes significantly with temperature, so temperature must always be measured along with \texttt{EC}. The conductivity $\kappa$ in a fluid at 25\textdegree C is known as the specific conductance $\kappa_s$.  A correction between conductivity at a given temperature and specific conductance (i.e., $\kappa$ at 25°C) is
+
+\begin{equation}\label{eq:ec_temp}
+	\kappa_s = \kappa\left (\frac{1}{1+0.0191\left ( T-25 \right )}\right )
+\end{equation}
+
+where T is the temperature of the fluid (see \htmladdnormallink{Miller, 1985}{ https://pubs.usgs.gov/wsp/2311/report.pdf}).  A short-hand rule is that conductivity increases by about 2\% per \textdegree C.  In any case, it is critical to measure temperature along with \texttt{EC}. The next section illustrates how this can be accomplished using what you already know about voltage dividers and thermistors, and how the basic measurement approach can be improved with the addition of a couple extra electrodes.
+
+\subsection{Types of voltage-based \texttt{EC} measurements}
+
+There are several approaches for measuring \texttt{EC}, but all are essentially ways of measuring resistance $R$ in Equation \ref{eq:cell_const}. The simplest approach is to make the measurement using a simple voltage divider, where the fluid serves as one of the resistors and a second, known resistor serves as the second.  When a known voltage is applied across the voltage divider, the fraction of the overall drop that occurs across the fluid can be used to compute its apparent resistance.  \texttt{EC} can then be computed if we know the instrument's cell constant.
+
+\begin{marginfigure}[0cm]
+	\begin{center}
+		\includegraphics[height=5cm]{Images/4pole_circuit.png}
+		\caption[Four-pole EC cell]{Schematic for a four-pole electrical conductivity celll. This circuit can also be driven with an alternating current if the state of electrodes 1 and 2 are alternatingly set to 3.3V and 0V, respectively, in rapid succession. This changes the direction of current flow, minimizing the possible impact of polarization within the fluid and somewhat reducing the tendency of the electrodes to corrode.}
+		\labfig{4pole}
+	\end{center}
+\end{marginfigure}
+
+\paragraph{2-pole vs. 4-pole measurements} Unfortunately, simple 2-pole \texttt{EC} probes based on a single voltage divider only work well for relatively low \texttt{EC}. For this reason, 4-pole electrodes (or other non-contact appraches that are not the subject of this chapter) are typically required for most oceanographic measurements. Furthermore, when 2-pole electrodes are deployed for an extended period of time, corrosion or fouling of the electrodes can significantly change the apparent resistance $R$ between electrodes, completely invalidating the measurements. These problems can be addressed by adding two additional electrodes inside the outer two charged electrodes (\reffig{4pole}). The voltage drop between these two inner (uncharged) electrodes can still be measured by an \adc, but now, because a relatively small fraction of the overall current will flow through the two inner electrodes, the voltage drop between the electrodes and the surrounding fluid will not be particularly large, even if fouling occurs. The voltage drop measured between the inner electrodes divided by the current flowing between the two outer electrodes should still be closely related to the overall resistance $R$ (recall the form of Ohm's law that says $R = V/I$). While $V$ across the inner electrodes isn't precisely equal to $V$ across the outer electrodes, it should still be closely (and linearly) related, so it can still be used as an input for a calibration procedure.  
+
+\paragraph{AC vs. DC measurements} Another major challenge in measuring \texttt{EC} in water using \emph{direct current} (DC) is that water polarizes when a voltage is applied. Water molecules can then reorient themselves, changing the electrical properties fo the fluid. This is particularly problematic when a significant amount of current flows, as when the \texttt{EC} is high. The problem can be overcome to some extent by using an \emph{alternating current} (AC)-based method, that is, by switching the direction of current flow at regular (rapid) intervals.  Commercial sensors often use relatively complicated circuitry to create and read the AC current, but we can emulate this relatively easily with a microcontroller simply by switching the states of the positive and negative outer electrodes (i.e., at \texttt{gpio1} and \texttt{gpio2}) at regular intervals.
+
+In the circuit shown in \reffig{4pole}, overall current $I$ can be estimated by measuring the voltage drop across either resistor R1 or R2 by simply recording the \adc measurement associated with that resistor when the adjacent \texttt{gpio} pin is set to \texttt{0V}.  Ohm's law says that $I = V/R$ in that situation. The estimate for$R$ within the fluid can then be made by dividing the voltage difference betwen \adc1 and \adc2 by $I$.  
+
+\subsection{Electrical conductivity circuit assembly\sidenote[][*-10]{
+	\begin{kaobox}[backgroundcolor=\SNcolor,frametitlebackgroundcolor=\SNcolor,frametitle=Which microcontroller works with this activity?]\textbf{Full compatibility: \texttt{ESP32} and \texttt{ESP32-S2}.} Because only \texttt{ESP32} and \texttt{ESP32-S2} include the five \adc s required for this activity, they are the only boards that can be used for the complete four-pole electrical conductivity circuit. The pin assignments in the code are for the \texttt{ESP32-S2} and must be changed for use with an \texttt{ESP32}.\\  
+\textbf{Parital compatibility: \texttt{ESP8266}.} Despite the fact that it only has one \adc, it is possible to use an \texttt{ESP8266} to record current across either resistor R1 or R2, thereby still performing a two-pole based mesurement.  
+	\end{kaobox}
+}.}
+
+A circuit like the one illustrated in \reffig{4pole} can be created simply by laying out the circuit on a breadboard and using the loose ends of several jumper pins as the electrodes. The value to use for resistors R1 and R2 depends on the \texttt{EC} of the fluid anticated as well as on the cell constant of the elecrodes (something that is unlikely to be known in advance).  A value of 250 \si{\ohm} for both resistors is a good starting point. IMPORTANT:  However, if an \texttt{ESP8266} is to be used, the value of the resistor NOT connected to the \adc should be approximately 3 times the value of the the other resistor to ensure that the limits on the maximum voltage for the \adc are not exceeded.
+
+\begin{marginfigure}[0cm]
+	\begin{center}
+		\includegraphics[height=7cm]{Images/ec_breadboard.png}
+		\caption[Breadboard layout for four-pole \texttt{EC} cell]{Breadboard layout for four-pole electrical conductivity celll. The four \texttt{EC} electrodes should be connected to four \adc pins, and if the NTC thermistor is used, a $V_{data}$ signal can be connected to a fifth \adc.  The \adc pins can be changed in software.}
+		\labfig{fig:ec_breadboard}
+	\end{center}
+\end{marginfigure}
+
+A breadboard layout illustrating the circuit is provided in \reffig{fig:ec_breadboard}. The layout includes an optional NTC thermistor that can be used for making temperature measurements.
+
+While it is possible to use bare wire for the electrodes, a more robust solution is to use graphite, which will not corrode even in harsh, highly-saline environments. A low-cost source for graphite material is 2-mm diameter pencil lead, available in any art-supply shop. While it is not possible to solder or crimp wire directly to the pencil lead, wire can be wrapped around the lead and then secured in place with shrink tubing.
+
+\begin{marginfigure}[6cm]
+	\begin{center}
+		\includegraphics[height=9cm]{Images/AppendixB_cap}
+		\caption[3-D printed \texttt{EC cell} housing]{3D printed \texttt{EC} cell housing. A similar housing can be cut from acrylic on a laser cutter. The housing includes mounting holes for electrodes that ensures their geometry can be laid out in a repeatable way. There are also mounting holes for an optional NTC thermistor. The electrodes and thermistor are already mounted in this image.}
+		\labfig{fig:3Dcap}
+	\end{center}
+\end{marginfigure}
+
+The probe is not particularly useful unless it can immersed in fluid. Obviously, this cannot be done if the bare wires leading up the the electrodes are exposed. Templates for laying out the electrodes can be 3-D printed or laser-cut.  The 3-D printed template is shown in \reffig{fig:3Dcap}. Once electrodes are placed through the mounting holes, they can be fixed in place using hot-melt glue. Glue can then carefully be placed around the outside of the electrodes and over the thermistor to provide a waterproof surface.
+
+\subsubsection{Operation of \texttt{EC} cell}
+
+Once the circuit is laid out, the cell can be run using the following code. The sampling resistor values, maximum \adc counts, and possibly pin assignments should be changed to be consistent with your setup.
+
+\begin{lstlisting}[language=Python]
+import machine
+from machine import Pin, ADC
+import time
+import math
+import array as arr
+
+#sampling parameters
+n = 12 #number of samples per measurement
+cycle_time = 100
+[on1,off1,on2,off2] = [cycle_time,cycle_time,cycle_time,cycle_time] #sleep time in microseconds
+printflag = 0  #flag for extra output
+
+#resistor values 
+con_resistance = 272 #resistor (ohms) on either end of conductivity cell
+therm_resistance = 9880 #resistor (ohms) in line with thermistor
+
+#max ADC count
+max_count = 8191 #for ESP32S2 in single read mode
+attenuation_code = ADC.ATTN_11DB #ADC attenuation mode--specifies max readable voltage
+max_voltage = 2.730 #max readable voltage--should be calibrated for 11DB atten
+
+#define gpio pins
+gpio1 = Pin(11, Pin.OUT)  #connects to P1 through con_resistance
+adc1 = ADC(Pin(10))  #connects directly to P4
+adc2 = ADC(Pin(9)) #connects directly to P3
+gpio2 = Pin(12, Pin.OUT) #connects to P2 through con_resistance
+therm_power = Pin(13, Pin.OUT) #connects to either pole of NTC thermistor
+adc3_current = ADC(Pin(8)) #Pin A5 on Feather ESP32-S2 -- connects directly to P2
+adc4_current = ADC(Pin(6)) #connects directly to P1
+adc_therm = ADC(Pin(5)) #connects to either pole of NTC thermistor
+
+\end{lstlisting}
+
+Once pins are assigned and parameters set, the program operates by first setting the maximum \adc voltage as high as possible using the \texttt{ESP32}'s attenuation command.  This should set the maximum voltage to around 2.5 volts, althought this should have been checked earlier for your device.
+
+The pre-allocates storage arrays before doing any readings in order to quickly store data, thereby allowing the fastest possible AC signal. It then enters the loop where \adc measurements are made. The loop includes short sleep statements to ensure the \adc has time to re-set after a reading is made. Once readings are made with the outer \texttt{gpio} pins in one state, the states are switched (so the \texttt{gpio} pin that had previously been set to \texttt{0V} is set to {texttt{3.3V}, and vice-versa. \adc readings are then taken at this polarity state for each \adc pin. When the loop ends, the time taken for executing the loop is used to compute the freqency of the AC signal.
+
+\begin{lstlisting}[language=Python]
+
+#set attenuation so that maximum voltage is at highest possible level
+adc1.atten(ADC.ATTN_11DB)
+adc2.atten(ADC.ATTN_11DB)
+adc3_current.atten(ADC.ATTN_11DB)
+adc4_current.atten(ADC.ATTN_11DB)
+adc_therm.atten(ADC.ATTN_11DB)
+
+#pre-allocate arrays that will store counts
+imeas1 = arr.array('l',[0]*n)
+imeas2 = arr.array('l',[0]*n)
+p3meas1 = arr.array('l',[0]*n)
+p3meas2 = arr.array('l',[0]*n)
+p4meas1 = arr.array('l',[0]*n)
+p4meas2 = arr.array('l',[0]*n)
+
+starttime = time.ticks_us()
+for i in range(n):
+    #normal polarity
+    gpio1.value(1)
+    time.sleep_us(on1)
+    imeas1[i] = adc4_current.read()
+    p3meas1[i] = adc1.read()
+    p4meas1[i] = adc2.read()
+    gpio1.value(0)
+    time.sleep_us(off1)
+    
+    #switched polarity
+    gpio2.value(1)
+    time.sleep_us(on2)
+    imeas2[i] = adc3_current.read()
+    p3meas2[i] = adc1.read()
+    p4meas2[i] = adc2.read()
+    gpio2.value(0)
+    time.sleep_us(off2)
+ 
+endtime = time.ticks_us()
+elapsed_time = endtime - starttime
+meas_freq = n/(elapsed_time/1000000)
+
+\end{lstlisting}
+
+Now that data are collected, the code processes the data by computing the relevant currents, voltages, and resistances for the two polarity states (state 1: \texttt{gpio1} high and \texttt{gpio2} low; state 2: \texttt{gpio1} low and texttt{gpio2} high). It then tosses out the upper and lower quartile and computes the mean of the remaining data to provide a single estimate for I, R, and V for each polarity state.  
+
+\begin{lstlisting}[language=Python]
+#pre-allocate arrays for current, voltage drop across poles, and resistance, for flow each direction
+i1 = arr.array('f',[0]*n)
+i2 = arr.array('f',[0]*n)
+V1 = arr.array('f',[0]*n)
+V2 = arr.array('f',[0]*n)
+R1 = arr.array('f',[0]*n)
+R2 = arr.array('f',[0]*n)
+
+#compute current, voltage, and resistance for each sample (do outside sampling loop to maintain sampling timing)
+for i in range(n):
+    try:
+        i1[i] = imeas1[i] / max_count * max_voltage / con_resistance 
+        i2[i] = imeas2[i] / max_count * max_voltage / con_resistance 
+        V1[i] = (p3meas1[i] - p4meas1[i])/max_count * max_voltage
+        V2[i] = (p4meas2[i] - p3meas2[i])/max_count * max_voltage
+        R1[i] = V1[i]/i1[i]
+        R2[i] = V2[i]/i2[i]
+    except:
+        R1[i] = -999999
+        R2[i] = -999999
+        print('Error in resistance computation')
+
+#clean data by sampling middle two quartiles       
+upper_index = math.ceil(3*n/4)
+lower_index = math.floor(n/4)
+sampled_length = (upper_index - lower_index)
+resistance1 = sum(sorted(R1)[lower_index:upper_index])/sampled_length
+resistance2 = sum(sorted(R2)[lower_index:upper_index])/sampled_length
+resistance_average = (resistance1+resistance2)/2
+current1 = sum(sorted(i1)[lower_index:upper_index])/sampled_length
+current2 = sum(sorted(i2)[lower_index:upper_index])/sampled_length
+current_average = (current1+current2)/2
+
+\end{lstlisting}
+
+If the thermistor has been included in the circuit, it can be read here.  Steinhart-Hart coefficients associated with a particular NTC thermistor (by manufacturer \texttt{littlefuse} are included here, but they can be changed to match what you got by calibration.
+
+\begin{lstlisting}[language=Python]
+
+#read thermistor
+A = 0.001125308852122
+B = 0.000234711863267
+C = 0.000000085663516
+therm_count = arr.array('f',[0]*n)
+therm_power.value(1)
+for i in range(n):
+    therm_count[i] = adc_therm.read()
+therm_power.value(0)
+therm_count_av = sum(sorted(therm_count)[lower_index:upper_index])/sampled_length    
+therm_voltage = therm_count_av / max_count * max_voltage
+therm_i = therm_voltage / therm_resistance
+R_t = (3.3 - therm_voltage)/therm_i
+T = 1/((A+B*(math.log(R_t)))+C*((math.log(R_t))**3))-273.15
+
+\end{lstlisting}
+
+Finally, data are processed and printed to the screen. In order to ensure that the sensor was not sampling beyond the range of $V_max$ of any of the \adc s that were used in circuit, the maximum and mimimum \adc counts are also computed and printed out.  If the maximum is at the value of the maximum count, the reading is suspect.
+
+\begin{lstlisting}[language=Python]
+
+    
+#find maximum and minimum counts to see if out of range of ADC:
+arrays_of_counts = [imeas1, imeas2, p3meas1, p3meas2, p4meas1, p4meas2]
+oldmax = 0
+oldmin = max_count
+for array in arrays_of_counts:
+    maximum = max(max(array),oldmax)
+    minimum = min(min(array),oldmin)
+    oldmax = maximum
+    oldmin = minimum
+
+#Print output
+if printflag:
+    for i in range (n):
+        print(f"R1 = {R1[i]:.2f}, R2 = {R2[i]:.2f}, V1 = {V1[i]:.2f}, V2 = {V2[i]:.2f}, i1 = {i1[i]:.2f}, i2 = {i2[i]:.2f}")
+        print(f"adc_count3 = {imeas2[i]}, adc_count4 = {imeas1[i]}, adc1_1 = {p3meas1[i]}, acd1_2 = {p4meas1[i]}, adc2_1 = {p4meas1[i]}, adc2_2 = {p4meas2[i]}")
+outputstring = f"R1 = {resistance1:.2f}, R2 = {resistance2:.2f}, R_av = {resistance_average:.2f}, "
+outputstring += f"i1 = {current1:.5f}, i2 = {current2:.5f}, i_av = {current_average:.5f}, "
+outputstring += f"T = {T:.2f}, freq = {meas_freq:.1f} hz, max_count = {maximum}, min_count = {minimum}"
+print(outputstring)
+    
+\end{lstlisting}
+
+\loadMilestone{mlst:04i} % load milestone with tags id: mlst:04i
+
+\subsection{\color{gray}Electrical conductivity circuit calibration \color{black}}
+
+\color{gray}Material describing analysis of calibration data will be added here.\color{black}
+
+
+
+\begin{kaobox}[frametitle=Mixing up an \texttt{EC} calibration fluid]
+Potassium Chloride (KCl) is often used as a calibration standard for \texttt{EC} cells. A 0.1 molar solution has a specific conductance $\kappa_s$ of approximately \num{1.3e4} \si{\micro\siemens\cm}. For KCl, this concentration is equivalent to 7.43 g KCl/L water.
+\end{kaobox}
+
+
+\newpage
+
 
 \section{Environmental sensing with time: measuring light intensity with frequency}
 \labsec{light_freq}
