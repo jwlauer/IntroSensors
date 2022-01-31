@@ -1246,23 +1246,23 @@ Fluids can also conduct electricity to varying degrees. Some, like air, are part
 	\end{center}
 \end{marginfigure}
 
-\texttt{EC} is defined as the ability of a fixed volume of substance to transmit current in a single direction. A ideal conductivity measurement cell for a liquid substance might consist of a two planar electrodes, each having the surface area $A$ in contact with the liquid (Figure \reffig{ec_cell}. A perfect insulator would surround the prismatic region, so when one electrode is charged to a higher voltage than the other, all current would flow directly from electrode to electrode by following a single path length length $L$.  Conductivity $\kappa$ is defined as 
+\texttt{EC} is defined as the ability of a fixed volume of substance to transmit current in a single direction. A ideal conductivity measurement cell for a liquid substance might consist of a two planar electrodes, each having the surface area $A$ in contact with the liquid (\reffig{ec_cell}). A perfect insulator would surround the prismatic region, so when one electrode is charged to a higher voltage than the other, all current would flow directly from electrode to electrode by following a single path length $L$.  Conductivity $\kappa$ is defined as 
 
 \begin{equation}\label{eq:ec}
 	\kappa= \frac{L}{AR}
 \end{equation}
 
-where $R$ is the apparent resistance, in \si{ohm}, of the fluid between the two electrodes. While it's tempting to think of electrical conductivity as the inverse of resistance, that is not the case because the resistance in the test cell depends not only on the fluid (and hence it's \texttt{EC}) but also on the length between electrodes and the electrode area.  As $L$ increases, resistance would increase, and as $A$ increases, resistance would decrease. The best way to think of electrical conductivity, then, is as the property that when divided by the current path length, gives the inverse resistance per unit cross-sectional area of the fluid.  Several units are available for describing $\kappa$. In some references, the inverse of resistance is described using the unit \emph{Mho}, (obviously, a play on the word "Ohm", which makes it easy to remember), with 1 Mho = \si{1 \ohm^{-1}}.  However, the proper SI unit describing the inverse of resistance is a \emph{Siemen}, which is abreviated using the symbol S, again, with \si{1S = 1 \ohm^{-1}}. The basic SI unit for \texttt{EC}, then, is S/m, although \texttt{EC} is often reported in S/cm, or, quite commonly, $\mu$S/cm, which is a convenient unit for presenting \texttt{EC} of water. At typical temperatures, fresh water has \texttt{EC} in the 100-1000 $\mu$S/cm range, while seawater tends to be closer to 30,000 to 50,000 $\mu$S/cm.
+where $R$ is the apparent resistance, in \si{ohm}, of the fluid between the two electrodes. While it's tempting to think of electrical conductivity as the inverse of resistance, that is not the case because the resistance in the test cell depends not only on the fluid (and hence it's \texttt{EC}) but also on the length between electrodes and the electrode area.  As $L$ increases, resistance would increase, and as $A$ increases, resistance would decrease. The best way to think of electrical conductivity, then, is as the property that when divided by the current path length, gives the inverse resistance per unit cross-sectional area of the fluid.  Several units are available for describing $\kappa$. In some references, the inverse of resistance is described using the unit "Mho", (obviously, a play on the word "Ohm", which makes it easy to remember), with 1 Mho = \si{1 \ohm^{-1}}.  However, the proper SI unit describing the inverse of resistance is a \emph{Siemen}, which is abreviated using the symbol S, again, with \si{1S = 1 \ohm^{-1}}. The basic SI unit for \texttt{EC}, then, is S/m, although \texttt{EC} is often reported in S/cm, or, quite commonly, $\mu$S/cm, which is a convenient unit for presenting \texttt{EC} of water. At typical temperatures, fresh water has \texttt{EC} in the 100-1000 $\mu$S/cm range, while seawater tends to be closer to 30,000 to 50,000 $\mu$S/cm.
 
-It is difficult (and unnecessary) to build test cells whose geometries perfectly match the idealized \texttt{EC} cell illustrated in \reffig{ec_cell}. Instead, it is quite common to completely immerse all sides of both electrodes (which could be just about any shape) in the fluid and then let multiple current flow pathways develop between the electrodes. It's not really possible to identify a single current path length $L$, so you might wonder how its possible to estimate \texttt{EC} from a cell constructed using arbitrarily-shaped electrodes. The standard approach is to identify \texttt{EC} by calibration, that is, but measuring the electrically properties of the cell at one or more known values of \texttt{EC}.  According to Equation \ref{eq:ec}, we expect that the apparent resistance $R$ across the cell to vary inversely with $\kappa$, so the most common approach is to assume that calibration data will follow a simple linear relationship. 
+It is difficult (and unnecessary) to build test cells whose geometries perfectly match the idealized \texttt{EC} cell illustrated in \reffig{ec_cell}. Instead, it is quite common to completely immerse all sides of both electrodes (which could be just about any shape) in the fluid and then let multiple current flow pathways develop between the electrodes. It's not really possible to identify a single current path length $L$, so you might wonder how to estimate \texttt{EC} from a cell constructed using arbitrarily-shaped electrodes. The standard approach is to identify \texttt{EC} by calibration, that is, but measuring the electrically properties of the cell at one or more known values of \texttt{EC}.  According to Equation \ref{eq:ec}, we expect the resistance $R$ across the cell to vary inversely with $\kappa$, so the most common approach is to assume that calibration data will follow a simple linear relationship. 
 
 \begin{equation}\label{eq:cell_const}
 	\kappa= kR^{-1}
 \end{equation}
  
-In Equation \ref{eq:cell_const}, the constant of proportionality $k$ is known as the cell constant.  It has dimensions L\textsuperscript{-1}, and it is normally found by calibration. Once $k$ is known for a given cell, all that is required to make an estimate of \texttt{EC} is to measure the apparent resistance across the cell.  
+In Equation \ref{eq:cell_const}, the constant of proportionality $k$ is known as the \emph{cell constant}.  It has dimensions L\textsuperscript{-1}, and it is normally found by calibration. Once $k$ is known for a given cell, all that is required to make an estimate of \texttt{EC} is to measure the resistance across the cell.  
 
-Because the conductivity of water varies over many orders of magnitude, we generally can’t use the same probe for all measurements.  For low conductivity solutions, we need the electrodes to be relatively close together.  For high conductivity, they should be farther apart.  Probes with cell constant of between 1 and 10 cm\textsuperscript{-1} are appropriate for measuring the conductivity of estuarine water.  Probes with cell constants of 0.1, 1, and 10 cm are commonly available.  However, the estimate is never perfect, so the cell constant should really be found by calibration using a fluid with known $\kappa$.
+Because the conductivity of water varies over many orders of magnitude, we generally can’t use the same probe for all measurements.  For low conductivity solutions, we need the electrodes to be relatively close together.  For high conductivity, they should be farther apart. Probes with cell constants of 0.1, 1, and 10 cm are commonly available (note that cell constants of between 1 and 10 cm\textsuperscript{-1} are most appropriate for measuring the conductivity of seawater). However, the estimate is never perfect, so the cell constant should really be found by calibration using a fluid with known $\kappa$.
 
 \texttt{EC} changes significantly with temperature, so temperature must always be measured along with \texttt{EC}. The conductivity $\kappa$ in a fluid at 25\textdegree C is known as the specific conductance $\kappa_s$.  A correction between conductivity at a given temperature and specific conductance (i.e., $\kappa$ at 25°C) is
 
@@ -1284,11 +1284,11 @@ There are several approaches for measuring \texttt{EC}, but all are essentially 
 	\end{center}
 \end{marginfigure}
 
-\paragraph{2-pole vs. 4-pole measurements} Unfortunately, simple 2-pole \texttt{EC} probes based on a single voltage divider only work well for relatively low \texttt{EC}. For this reason, 4-pole electrodes (or other non-contact appraches that are not the subject of this chapter) are typically required for most oceanographic measurements. Furthermore, when 2-pole electrodes are deployed for an extended period of time, corrosion or fouling of the electrodes can significantly change the apparent resistance $R$ between electrodes, completely invalidating the measurements. These problems can be addressed by adding two additional electrodes inside the outer two charged electrodes (\reffig{4pole}). The voltage drop between these two inner (uncharged) electrodes can still be measured by an \adc, but now, because a relatively small fraction of the overall current will flow through the two inner electrodes, the voltage drop between the electrodes and the surrounding fluid will not be particularly large, even if fouling occurs. The voltage drop measured between the inner electrodes divided by the current flowing between the two outer electrodes should still be closely related to the overall resistance $R$ (recall the form of Ohm's law that says $R = V/I$). While $V$ across the inner electrodes isn't precisely equal to $V$ across the outer electrodes, it should still be closely (and linearly) related, so it can still be used as an input for a calibration procedure.  
+\paragraph{2-pole vs. 4-pole measurements} Unfortunately, simple 2-pole \texttt{EC} probes based on a single voltage divider only work well for relatively low \texttt{EC}. For this reason, 4-pole electrodes (or other non-contact approaches that are not the subject of this chapter) are typically required for most oceanographic measurements. Furthermore, when 2-pole electrodes are deployed for an extended period of time, corrosion or fouling of the electrodes can significantly change the apparent resistance $R$ between electrodes, completely invalidating the measurements. These problems can be addressed by adding two additional electrodes inside the outer two charged electrodes (\reffig{4pole}). The voltage drop between these two inner (uncharged) electrodes can still be measured by an \adc, but now, because a relatively small fraction of the overall current will flow through the two inner electrodes, the voltage drop between the electrodes and the surrounding fluid will not be particularly large, even if fouling occurs. The voltage drop measured between the inner electrodes divided by the current flowing between the two outer electrodes should still be closely related to the overall resistance $R$ (recall the form of Ohm's law that says $R = V/I$). While $V$ across the inner electrodes isn't precisely equal to $V$ across the outer electrodes, it should still be closely (and linearly) related, so it can still be used as an input for a calibration procedure.  
 
-\paragraph{AC vs. DC measurements} Another major challenge in measuring \texttt{EC} in water using \emph{direct current} (DC) is that water polarizes when a voltage is applied. Water molecules can then reorient themselves, changing the electrical properties fo the fluid. This is particularly problematic when a significant amount of current flows, as when the \texttt{EC} is high. The problem can be overcome to some extent by using an \emph{alternating current} (AC)-based method, that is, by switching the direction of current flow at regular (rapid) intervals.  Commercial sensors often use relatively complicated circuitry to create and read the AC current, but we can emulate this relatively easily with a microcontroller simply by switching the states of the positive and negative outer electrodes (i.e., at \texttt{gpio1} and \texttt{gpio2}) at regular intervals.
+\paragraph{AC vs. DC measurements} Another major challenge in measuring \texttt{EC} in water using \emph{direct current} (DC) is that water polarizes when a voltage is applied. Water molecules can then reorient themselves, changing the electrical properties of the fluid. This is particularly problematic when a significant amount of current flows, as when the \texttt{EC} is high. The problem can be overcome to some extent by using an \emph{alternating current} (AC)-based method, that is, by switching the direction of current flow at regular (rapid) intervals.  Commercial sensors often use relatively complicated circuitry to create and read the AC current, but we can emulate this relatively easily with a microcontroller simply by switching the states of the positive and negative outer electrodes (i.e., at \texttt{gpio1} and \texttt{gpio2}) at regular intervals.
 
-In the circuit shown in \reffig{4pole}, overall current $I$ can be estimated by measuring the voltage drop across either resistor R1 or R2 by simply recording the \adc measurement associated with that resistor when the adjacent \texttt{gpio} pin is set to \texttt{0V}.  Ohm's law says that $I = V/R$ in that situation. The estimate for$R$ within the fluid can then be made by dividing the voltage difference betwen \adc1 and \adc2 by $I$.  
+In the circuit shown in \reffig{4pole}, overall current $I$ can be estimated by measuring the voltage drop across either resistor R1 or R2 by simply recording the \adc measurement associated with that resistor when the adjacent \texttt{gpio} pin is set to \texttt{0V}.  Ohm's law says that $I = V/R$ in that situation. The estimate for $R$ within the fluid can then be made by dividing the voltage difference betwen \adc1 and \adc2 by $I$.  
 
 \subsection{Electrical conductivity circuit assembly.}
 
@@ -1296,9 +1296,9 @@ A circuit like the one illustrated in \reffig{4pole} can be created simply by la
 	\begin{kaobox}[backgroundcolor=\SNcolor,frametitlebackgroundcolor=\SNcolor,frametitle=Which microcontroller works with this activity?]\textbf{Full compatibility: \texttt{ESP32} and \texttt{ESP32-S2}.} Because only \texttt{ESP32} and \texttt{ESP32-S2} include the five \adc s required for this activity, they are the only boards that can be used for the complete four-pole electrical conductivity circuit. The pin assignments in the code are for the \texttt{ESP32-S2} and must be changed for use with an \texttt{ESP32}.\\  
 \textbf{Parital compatibility: \texttt{ESP8266}.} Despite the fact that it only has one \adc, it is possible to use an \texttt{ESP8266} to record current across either resistor R1 or R2, thereby still performing a two-pole based mesurement.  
 	\end{kaobox}
-}. The value to use for resistors R1 and R2 depends on the \texttt{EC} of the fluid anticated as well as on the cell constant of the elecrodes (something that is unlikely to be known in advance).  A value of 250 \si{\ohm} for both resistors is a good starting point. IMPORTANT:  However, if an \texttt{ESP8266} is to be used, the value of the resistor NOT connected to the \adc should be approximately 3 times the value of the the other resistor to ensure that the limits on the maximum voltage for the \adc are not exceeded.
+}. The value to use for resistors R1 and R2 depends on the \texttt{EC} of the fluid anticipated as well as on the cell constant of the elecrodes (something that is unlikely to be known in advance).  A value of 250 \si{\ohm} for both resistors is a good starting point. IMPORTANT:  If an \texttt{ESP8266} is to be used, the value of the resistor NOT connected to the \adc should be approximately 3 times the value of the the other resistor to ensure that the limits on the maximum voltage for the \adc are not exceeded.
 
-\begin{marginfigure}[0cm]
+\begin{marginfigure}[-3cm]
 	\begin{center}
 		\includegraphics[height=7cm]{Images/ec_breadboard.png}
 		\caption[Breadboard layout for four-pole \texttt{EC} cell]{Breadboard layout for four-pole electrical conductivity celll. The four \texttt{EC} electrodes should be connected to four \adc pins, and if the NTC thermistor is used, a $V_{data}$ signal can be connected to a fifth \adc.  The \adc pins can be changed in software.}
@@ -1360,7 +1360,7 @@ adc_therm = ADC(Pin(5)) #connects to either pole of NTC thermistor
 
 Once pins are assigned and parameters set, the program operates by first setting the maximum \adc voltage as high as possible using the \texttt{ESP32}'s attenuation command.  This should set the maximum voltage to around 2.5 volts, althought this should have been checked earlier for your device.
 
-The pre-allocates storage arrays before doing any readings in order to quickly store data, thereby allowing the fastest possible AC signal. It then enters the loop where \adc measurements are made. The loop includes short sleep statements to ensure the \adc has time to re-set after a reading is made. Once readings are made with the outer \texttt{gpio} pins in one state, the states are switched (so the \texttt{gpio} pin that had previously been set to \texttt{0V} is set to {texttt{3.3V}, and vice-versa. \adc readings are then taken at this polarity state for each \adc pin. When the loop ends, the time taken for executing the loop is used to compute the freqency of the AC signal.
+The code pre-allocates storage arrays before doing any readings in order to quickly store data, thereby allowing the fastest possible AC signal. It then enters the loop where \adc measurements are made. The loop includes short sleep statements to ensure the \adc has time to reset after a reading is made. Once readings are made with the outer \texttt{gpio} pins in one state, the states are switched (so the \texttt{gpio} pin that had previously been set to \texttt{0V} is set to \texttt{3.3V}, and vice-versa. \adc readings are then taken at this polarity state for each \adc pin. When the loop ends, the time taken for executing the loop is used to compute the freqency of the AC signal.
 
 \begin{lstlisting}[language=Python]
 
@@ -1405,7 +1405,7 @@ meas_freq = n/(elapsed_time/1000000)
 
 \end{lstlisting}
 
-Now that data are collected, the code processes the data by computing the relevant currents, voltages, and resistances for the two polarity states (state 1: \texttt{gpio1} high and \texttt{gpio2} low; state 2: \texttt{gpio1} low and texttt{gpio2} high). It then tosses out the upper and lower quartile and computes the mean of the remaining data to provide a single estimate for I, R, and V for each polarity state.  
+Now that data are collected, the code processes the data by computing the relevant currents, voltages, and resistances for the two polarity states (state 1: \texttt{gpio1} high and \texttt{gpio2} low; state 2: \texttt{gpio1} low and \texttt{gpio2} high). It then tosses out the upper and lower quartile and computes the mean of the remaining data to provide a single estimate for I, R, and V for each polarity state.  
 
 \begin{lstlisting}[language=Python]
 #pre-allocate arrays for current, voltage drop across poles, and resistance, for flow each direction
@@ -1443,7 +1443,7 @@ current_average = (current1+current2)/2
 
 \end{lstlisting}
 
-If the thermistor has been included in the circuit, it can be read here.  Steinhart-Hart coefficients associated with a particular NTC thermistor (by manufacturer \texttt{littlefuse} are included here, but they can be changed to match what you got by calibration.
+If the thermistor has been included in the circuit, it can be read here.  Steinhart-Hart coefficients associated with a particular NTC thermistor (by manufacturer \texttt{littlefuse}) are included here, but they can be changed to match what you got by calibration.
 
 \begin{lstlisting}[language=Python]
 
@@ -1464,7 +1464,7 @@ T = 1/((A+B*(math.log(R_t)))+C*((math.log(R_t))**3))-273.15
 
 \end{lstlisting}
 
-Finally, data are processed and printed to the screen. In order to ensure that the sensor was not sampling beyond the range of $V_max$ of any of the \adc s that were used in circuit, the maximum and mimimum \adc counts are also computed and printed out.  If the maximum is at the value of the maximum count, the reading is suspect.
+Finally, data are processed and printed to the screen. In order to ensure that the sensor was not sampling beyond the range of $V_{max}$ of any of the \adc s that were used in circuit, the maximum and mimimum \adc counts are also computed and printed out.  If the maximum is at the value of the maximum count, the reading is suspect.
 
 \begin{lstlisting}[language=Python]
 
@@ -1497,16 +1497,16 @@ print(outputstring)
 
 It is impossible to completely controll all the variables that might affect the output of an analog sensor. In the case of the electrical conductivity cell, these variables include things like the exact length and angle of the exposed electrodes, the exact value of the resistors included in the circuit, the length of wire leading up to the electrodes (this wire has some resistance), the voltage reference used by the microcontroller's \adc, any fouling/corrosion of the electrodes, and so on.  Because we cannot know these parameters, the only way to make our sensor useable is to empirically search for a relationship between the physical parameter of interest and what we can read from the sensor.
 
-The first step in such a calibration normally involves identifying a calibration standard. In the case of \texttt{EC} cells, this is often handled by mixing up a solution of an electrolyte for which the relationship between \texttt{EC} and concentration is well known. The quality of the calibration will never be higher than the precision to which the \texttt{EC} of the calibration standard is known, so care must be taken to ensure that the standard is of high quality. The National Institute of Standards in Technology (NIST) provides guidelines for the production of high-quality standards, which are referred to as \emph{NIST-traceable}.  Alternatively, a highly precise, well, calibrated laboratory instrument can be used to measure the \texttt{EC} of a calibration solution mixed in the lab.  
+The first step in such a calibration normally involves identifying a calibration standard. In the case of \texttt{EC} cells, this is often handled by mixing up a solution of an electrolyte for which the relationship between \texttt{EC} and concentration is well known. The quality of the calibration will never be higher than the precision to which the \texttt{EC} of the calibration standard is known, so care must be taken to ensure that the standard is of high quality. The National Institute of Standards in Technology (NIST) provides guidelines for the production of high-quality standards, which are referred to as \emph{NIST-traceable}.  Alternatively, a highly precise, well calibrated laboratory instrument can be used to measure the \texttt{EC} of a calibration solution mixed in the lab.  
 
 \begin{kaobox}[frametitle=Mixing up an \texttt{EC} calibration fluid]
 Potassium Chloride (KCl) is often used as a calibration standard for \texttt{EC} cells. A 0.1 molar solution has a specific conductance $\kappa_s$ of approximately \num{1.3e4} \si{\micro\siemens\cm}. For KCl, this concentration is equivalent to 7.43 g KCl/L water.
 \end{kaobox}
 
 \subsubsection{Typical calibration procedure}
-Calibration of an \texttt{EC} device typically involves tabulating the output from the device across the range of conductivites of interest. It is good practice to perform more than one measurement at a given \texttt{EC}--for instance, a calibration based on measurements made in tripilicate would involve making three sensor readings for each known texttt\{EC} value. Having multiple measurements for a single \texttt{EC} improves the ability to identify where the sensor output becomes unreliable.
+Calibration of an \texttt{EC} device typically involves tabulating the output from the device across the range of conductivites of interest. It is good practice to perform more than one measurement at a given \texttt{EC}. For instance, a calibration based on measurements made in tripilicate would involve making three sensor readings for each known \texttt{EC} value. Having multiple measurements for a single \texttt{EC} improves the ability to identify where the sensor output becomes unreliable.
 
-Once data are collected, analysis must be performed to develop the empirical relationship between sensor reading and \texttt{EC}. A number of analytical approaches are available for this relationship, and many of these are beyond the scope of this textbook. We briefly touch on three simple approaches here\sidenote[][*]{
+Once data are collected, analysis must be performed to develop the empirical relationship between sensor reading and \texttt{EC}. A number of analytical approaches are available for this task, and many of these are beyond the scope of this textbook. We briefly touch on three simple approaches here\sidenote[][*]{
 		\begin{kaobox}[backgroundcolor=\SNcolor,frametitlebackgroundcolor=\SNcolor,frametitle=Computational Links]Each of the three approaches described in this section are illustrated in a Jupyter Notebook that you can use for your own computations.  The notebook is available at \htmladdnormallink{\texttt{Calibration Examples}}{https://github.com/jwlauer/EnvironmentalSensing/tree/master/AnalysisCode/Calibration}
 		\end{kaobox}
 	}
@@ -1517,16 +1517,16 @@ Once data are collected, analysis must be performed to develop the empirical rel
 \end{equation}
 
 \subsubsection{Direct computation of cell constant}
-In the first approach, we assume that \ref{eq:cell_const} describes the functional relationship precisely, and that the cell constant does not depend on \texttt{EC}.  Under these assumptions, we can use each sensor/\texttt{EC} pair to independently compute $k$
+In the first approach, we assume that Equation \ref{eq:cell_const} describes the functional relationship precisely, and that the cell constant does not depend on \texttt{EC}.  Under these assumptions, we can use each reading to independently compute $k$
 
 \begin{equation}\label{eq:cell_i}
 	k_i=\kappa _i R_i  
 \end{equation}
 
-where the subscipt $i$ denotes the value computed from the ${i_{th}}$ data pair.  The cell constants can then be averaged to find an overall estimate. 
+where the subscipt $i$ denotes the value associated with the ${i_{th}}$ data pair.  The cell constants can then be averaged to find an overall estimate. 
 
 \begin{equation}\label{eq:ave_cell_const}
-	\overline{k} = \frac{\sum_{i=1}^{n}k_i}{n}
+	\overline{k} = \frac{\sum\limits_{i=1}^n k_i}{n}
 \end{equation}
 
 Confidence limits $CL$ on the estimated mean cell constant can be computed using a statistical t-test. 
@@ -1535,17 +1535,17 @@ Confidence limits $CL$ on the estimated mean cell constant can be computed using
 	CL = \overline{k} \pm t_{({1-\alpha/2,n-1})}\frac{s}{\sqrt{n}}
 \end{equation}
 
-where $t$ is the value of the $t$ statistic at significance level $\alpha$ and $n-1$ degrees of freedom ($n$ is normally the number of samples) and $s$ is the sample standard deviation. Note that $s/\sqrt{n}$ is often referred to as the \emph{standard error}.  However, keep in mind that because these confidence limits characterize the precision of our estimate for $\overline{k}$, not the confidence we will have in any single measurement we later make using our device.
+where $t$ is the value of the $t$ statistic at significance level $\alpha$ and $n-1$ degrees of freedom ($n$ is normally the number of samples) and $s$ is the sample standard deviation. Note that $s/\sqrt{n}$ is often referred to as the \emph{standard error}.  Keep in mind that these confidence limits characterize the precision of our estimate for $\overline{k}$, not the confidence we will have in any single measurement we later make using our device.
  
 \subsubsection{Calibration by simple linear regression}
 
-Imperfections in our \texttt{EC} circuit design (and particularly the presence of internal resistance within each electrode) means that we don't necessary expect the \ref{eq:cell_const} to hold across the entire range of \texttt{EC}. We can account for this to some exent by including an offset (or y-intercept) in the relationship between $\frac{1}{R}$ and $\kappa$.
+Imperfections in our \texttt{EC} circuit design (and particularly the presence of internal resistance within each electrode) means that we don't necessary expect Equation \ref{eq:cell_const} to hold across the entire range of \texttt{EC}. We can account for this to some exent by including an offset (or y-intercept) in the relationship between $\frac{1}{R}$ and $\kappa$.
 
 \begin{equation}\label{eq:linear_calibration}
 	\frac{1}{R}=b_1\kappa +b_0.  
 \end{equation}
 
-where $b_1$ is the slope of the linear relationship and $b_0$ is the y-intercept. Essentially all statics packages include the ability to perform linear regression, so computing the slope and intercept from the observed $frac{1}{R}$ and $\kappa$ is straighforward. However, we also wish to characterize the confidence we have in the \texttt{EC} estimate we make from this relationship at a given sensor reading. Several methods for providing these limits are available.  Here, we summarize a method presented in \cite{LAVAGNINI} for adding a \emph{confidence intervals} to a calibration equation developed by linear regression.
+where $b_1$ is the slope of the linear relationship and $b_0$ is the y-intercept. Essentially all statics packages include the ability to perform linear regression, so computing the slope and intercept from the observed $\frac{1}{R}$ and $\kappa$ is straighforward. However, we also wish to characterize the confidence we have in the \texttt{EC} estimate we make from this relationship at a given sensor reading. Several methods for providing these limits are available.  Here, we summarize a method presented in \cite{LAVAGNINI} for adding a \emph{confidence intervals} to a calibration equation developed by linear regression.
 
 For generality, we use the variable $y_i$ to represent a sensor reading and the variable $x_i$ to represent the corresponding physical value.  In the case of the \texttt{EC} sensor, 
 \begin{equation}
@@ -1558,13 +1558,13 @@ and
 \end{equation}
 
 
-In practice, the mean of one or more sensor readings is used to estimate the value of the physical parameter of interest (e.g., \texttt{EC}).  The estimate of the physical parameter from the mean of $m$ sensor readings $\tilde{y}_m$ is denoted by $\tilde{x}_0$, and it's variance $s_{\tilde{x}_0}^{2}$ is given by \cite{LAVAGNINI} as: 
+In practice, after calibration is complete and the user wishes to use the calibrated instrument to collect data, the value of the physical parameter of interest (e.g., \texttt{EC}) will be computed based on the mean of one or more sensor readings. The estimate of the physical parameter computed from the mean of $m$ sensor readings $\tilde{y}_m$ is denoted by $\tilde{x}_0$, and its variance $s_{\tilde{x}_0}^{2}$ is given by \cite{LAVAGNINI} as: 
 
 \begin{equation}\label{eq:var_readings}
 	s_{\tilde{x}_0}^{2}=\frac{s_{y/x}^{2}}{b_{1}^{2}}\left (\frac{1}{m}+\frac{1}{n}+\frac{(\tilde{x}_0-\overline{x})^2}{\sum\limits_{i=1}^n \left ( x_i-\overline{x} \right )^2} \right )
 \end{equation}
 
-where $\bar{x}$ is the mean of the observed physical parameter (e.g., the mean \texttt{EC}),  
+where $\overline{x}$ is the mean of the observed physical parameter in the calibration dataset (e.g., the mean of all \texttt{EC}s values used as part of the calibration process),  
 
 \begin{equation}\label{eq:regression_var}
 	s_{y/x}^{2}=\frac{\sum\limits_{i=1}^n \left ( y_i-\tilde{y}_i \right )}{n-2},
@@ -1584,7 +1584,7 @@ This can be used to develop a confidence interval on the corresponding physical 
 	\hat{x}_0^\pm = \tilde{x}_0 \pm t_{({1-\alpha/2,n-2})}s_{\tilde{x}_0}
 \end{equation}
 
-where $\hat{x}_0^\pm$ represents the upper and lower limits on $\tilde{x}_0$.  In this case, we would expect there is a $1-\alpha$ chance that an our estimate $\tilde{x}_0$ falls within these limits.
+where $\hat{x}_0^\pm$ represents the upper and lower limits on $\tilde{x}_0$.  In this case, we would expect there to be a $1-\alpha$ chance that an our estimate $\tilde{x}_0$ falls within these limits.
 
 \begin{marginfigure}[0cm]
 	\begin{center}
@@ -1594,7 +1594,7 @@ where $\hat{x}_0^\pm$ represents the upper and lower limits on $\tilde{x}_0$.  I
 	\end{center}
 \end{marginfigure}
 
-An example of a linear regression calibration curve is given in figure \reffig{fig:linear_confidence}. The points from which the curve was generated were collected in triplicate at each \texttt{EC} value.  Data points are not evenly spaced because they were produced by diluting the previous calibration fluid by a specified amount.  This makes the regression particularly sensitive to the measurements made at the highest \texttt{EC} value. This sensitivity can be addressed to some extent by performing the regression on log-transformed data, as described next.
+An example of a linear regression calibration curve is given in figure \reffig{fig:linear_confidence}. The points from which the curve was generated were collected in triplicate at each \texttt{EC} value.  Data points are not evenly spaced because they were produced by diluting the previous calibration fluid by a specified amount.  This makes the regression particularly sensitive to the measurements made at the highest \texttt{EC} value. This sensitivity can be addressed to some extent by performing the regression on log-transformed data, as described in the next section.
 
 \subsubsection{Calibration by log-log regression}
 
@@ -1617,9 +1617,9 @@ and
 	\end{center}
 \end{marginfigure}
 
-The rest of the procedure follows as before.  This produces an analysis that places a regression line and confidence limits on the logs of the data, as illustrated in \reffig{fig:log_confidence}, which was produced using the same data as was used in \reffig{fig:linear_confidence}. Notice that the points now appear much more evenly spaced. This is because a given \texttt{EC} in the calibration standards were roughly a constant fraction of the \texttt{EC} of the next higher \texttt{EC} standard because of the relatively constant dilution.
+The rest of the procedure is the same as before.  This produces regression line and confidence limits describing the logs of the data, as illustrated in \reffig{fig:log_confidence}, which was produced using the same data as was used in \reffig{fig:linear_confidence}. Notice that the points now appear much more evenly spaced. This is because a given \texttt{EC} in the calibration standards were roughly a constant fraction of the \texttt{EC} of the next higher \texttt{EC} standard.
 
-Once the regression line and confidence limits are known on the log-scale, they can be re-transformed to the linear scale by taking antilogs (in this case, using the exponential function). 
+Once the regression line and confidence limits are known on the log scale, they can be re-transformed to the linear scale by taking antilogs (in this case, using the exponential function). 
 
 \begin{equation}
 	e^{ln(y)} = e^{b_1 ln(x) + b_0}
@@ -1637,7 +1637,7 @@ or, for the case of the \texttt{EC}-based calibration data presented here,
 	\frac{1}{R} = b_0 \kappa^{b_1}
 \end{equation}
 
-For practical computations, the inverse of \ref{power_calibration} would be used to compute \texttt{EC} from a given sensor value.
+For practical computations, the inverse of Equation \ref{power_calibration} would be used to compute \texttt{EC} from a given sensor value.
 
 \begin{equation}\label{power_calibration}
 	\kappa = {b_0}^{-\frac{1}{b_1}}\left ( \frac{1}{R}\right )^{\frac{1}{b_1}} 
@@ -1651,9 +1651,9 @@ For practical computations, the inverse of \ref{power_calibration} would be used
 	\end{center}
 \end{marginfigure}
 
-Once transformed back to the regular linear scale, it becomes clear that the confidence intervals do a much better job bounding the calibration data (\reffig{fig:log_confidence_retransformed}).
+Once transformed back to the regular linear scale, as in Figure \reffig{fig:log_confidence_retransformed}, it becomes clear that the confidence intervals do a much better job bounding the calibration data than do the limits associated with the simple linear regression presented in Figure \reffig{fig:linear_confidence}.
 
-
+\loadMilestone{mlst:04j} % load milestone with tags id: mlst:04j
 
 
 

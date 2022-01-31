@@ -526,6 +526,24 @@
 \end{kaobox}
 %</mlst:04i>
 
+%<*mlst:04j>
+\begin{kaobox}[backgroundcolor=\MScolor,frametitlebackgroundcolor=\MScolor,frametitle=\showmscntr Milestone: Calibration of \texttt{EC} sensor]
+	\begin{itemize}
+		\item [$\Box$] This Milestone is to develop a predictive equation that you can use to estimate \texttt{EC} using your sensor. \,
+		\begin{itemize}
+			\item[$\circ$] Open the \htmladdnormallink{\texttt{Calibration Examples}}{https://github.com/jwlauer/EnvironmentalSensing/tree/master/AnalysisCode/Calibration} Jupyter Notebook and load your data spreadsheet.
+			\item[$\circ$] Compute the mean value of your cell constant $\overline{k}$ using simple averaging. \,
+			\item[$\circ$] Use the linear-regression based approach to derive a linear equation that gives you \texttt{EC} from a sensor reading. \,
+			\item[$\circ$] Use the log-log regression based approach to derive a power function that gives you \texttt{EC} from a sensor reading. \,
+			\item[$\circ$] Estimate the upper and lower 95\% confidence limits on \texttt{EC} at a typical \texttt{EC} value for your dataset based a measurement made using the log-log equation. \,
+			\item[$\circ$] Recompute the limits you would get at this \texttt{EC} from the log-log equation if your post-calibration measurement protocol required that you always take four measurements of $\frac{1}{R}$ and average them before applying the your power-function based calibration equation.
+		\end{itemize}
+%\smallskip
+		Submit your calibration curves, the associated calibration equations, and a one-paragraph description that summarizes the quality of the calibration and the likely precision of a measurement you might make using your sensor.
+	\end{itemize}
+\end{kaobox}
+%</mlst:04j>
+
 
 \section{\refch{digital_interfaces} Milestones}
 \setcounter{mscntr}{0}
